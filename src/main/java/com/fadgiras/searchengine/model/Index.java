@@ -1,10 +1,21 @@
 package com.fadgiras.searchengine.model;
 
+import jakarta.persistence.*;
+
 import java.util.ArrayList;
 
+@Entity
+@Table(name = "Index")
 public class Index {
+
+    @Id
     private String word;
+
+    @ElementCollection
     private ArrayList<Integer> documentIds;
+
+    public Index() {
+    }
 
     public Index(String word, ArrayList<Integer> documentIds) {
         this.word = word;
