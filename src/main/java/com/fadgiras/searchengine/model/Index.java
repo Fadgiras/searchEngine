@@ -3,6 +3,7 @@ package com.fadgiras.searchengine.model;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 @Entity
 @Table(name = "Index")
@@ -11,13 +12,16 @@ public class Index {
     @Id
     private String word;
 
-    @ElementCollection
-    private ArrayList<Integer> documentIds;
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "index_book",
+            joinColumns = { @JoinColumn(name = "word")},
+            inverseJoinColumns = { @JoinColumn(name = "id")})
+    private Set<Book> documentIds;
 
     public Index() {
     }
 
-    public Index(String word, ArrayList<Integer> documentIds) {
+    public Index(String word, Set<Book> documentIds) {
         this.word = word;
         this.documentIds = documentIds;
     }
@@ -30,16 +34,16 @@ public class Index {
         this.word = word;
     }
 
-    public ArrayList<Integer> getDocumentIds() {
+    public Set<Book> getDocumentIds() {
         return documentIds;
     }
 
-    public void setDocumentIds(ArrayList<Integer> documentIds) {
+    public void setDocumentIds(Set<Book> documentIds) {
         this.documentIds = documentIds;
     }
 
-    public void addDocumentId(int documentId) {
-        documentIds.add(documentId);
+    public void addDocumentId(Book document) {
+        documentIds.add(document);
     }
 
     public void removeDocumentId(int documentId) {

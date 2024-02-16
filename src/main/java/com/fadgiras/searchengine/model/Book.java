@@ -16,8 +16,7 @@ public class Book {
     @Column(name = "author", columnDefinition = "TEXT")
     private String author;
 
-    @Lob @Basic(fetch=LAZY)
-    @Column(name = "content")
+    @Column(name = "content", columnDefinition = "TEXT")
     private String content;
 
     public Book() {
