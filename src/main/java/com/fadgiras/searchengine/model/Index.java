@@ -10,55 +10,23 @@ import java.util.Set;
 public class Index {
 
     @Id
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "book_id", nullable = false)
+    Book book;
+
+    @Column(name = "word", columnDefinition = "TEXT")
     private String word;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "index_book",
-            joinColumns = { @JoinColumn(name = "word")},
-            inverseJoinColumns = { @JoinColumn(name = "id")})
-    private Set<Book> documentIds;
+    @Column(name = "frequency")
+    private int frequency;
 
-    public Index() {
+    public Book getBook() {
+        return book;
     }
 
-    public Index(String word, Set<Book> documentIds) {
-        this.word = word;
-        this.documentIds = documentIds;
+    public void setBook(Book book) {
+        this.book = book;
     }
 
-    public String getWord() {
-        return word;
-    }
 
-    public void setWord(String word) {
-        this.word = word;
-    }
-
-    public Set<Book> getDocumentIds() {
-        return documentIds;
-    }
-
-    public void setDocumentIds(Set<Book> documentIds) {
-        this.documentIds = documentIds;
-    }
-
-    public void addDocumentId(Book document) {
-        documentIds.add(document);
-    }
-
-    public void removeDocumentId(int documentId) {
-        documentIds.remove(documentId);
-    }
-
-    public boolean containsDocumentId(int documentId) {
-        return documentIds.contains(documentId);
-    }
-
-    public int getDocumentCount() {
-        return documentIds.size();
-    }
-
-    public String toString() {
-        return "Index{word='" + word + "', documentIds=" + documentIds + "}";
-    }
 }

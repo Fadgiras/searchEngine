@@ -8,6 +8,7 @@ import static jakarta.persistence.FetchType.LAZY;
 @Table(name = "book")
 public class Book {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     @Column(name = "title", columnDefinition = "TEXT")

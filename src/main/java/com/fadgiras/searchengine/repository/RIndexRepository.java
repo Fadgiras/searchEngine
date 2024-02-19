@@ -1,6 +1,6 @@
 package com.fadgiras.searchengine.repository;
 
-import com.fadgiras.searchengine.model.Index;
+import com.fadgiras.searchengine.model.RIndex;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -8,22 +8,22 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface IndexRepository extends JpaRepository<Index, String> {
+public interface RIndexRepository extends JpaRepository<RIndex, String> {
 
     //get all indexes
-    @Query("SELECT i FROM Index i")
-    List<Index> getAllIndexes();
+    @Query("SELECT i FROM RIndex i")
+    List<RIndex> getAllIndexes();
 
     //get index by word
-    @Query("SELECT i FROM Index i WHERE i.word = ?1")
-    Index getIndexByWord(String word);
+    @Query("SELECT i FROM RIndex i WHERE i.word = ?1")
+    RIndex getIndexByWord(String word);
 
     //get index by document id
 //    @Query("SELECT i FROM Index i WHERE ?1 IN i.documentIds")
 //    Index getIndexByDocumentId(int documentId);
 
     //get all words
-    @Query("SELECT i.word FROM Index i")
+    @Query("SELECT i.word FROM RIndex i")
     List<String> getAllWords();
 
 }
