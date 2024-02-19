@@ -22,6 +22,13 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+//UWU
+import java.util.regex.*;
+import java.util.stream.Collectors;
+import java.util.Collections;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
 
 @RestController
 public class MainController {
@@ -36,7 +43,7 @@ public class MainController {
         Analyzer analyzer = new StandardAnalyzer();
         TokenStream result = analyzer.tokenStream(null, term);
         //avoid stemming here
-//        result = new PorterStemFilter(result);
+        // result = new PorterStemFilter(result);
         result = new StopFilter(result, EnglishAnalyzer.ENGLISH_STOP_WORDS_SET);
         CharTermAttribute resultAttr = result.addAttribute(CharTermAttribute.class);
         result.reset();
@@ -60,7 +67,7 @@ public class MainController {
         List<Index> indexes = new ArrayList<>();
         //get document id from database
 
-//        // test data
+        //// test data
         ClassLoader classloader = Thread.currentThread().getContextClassLoader();
         InputStream is = classloader.getResourceAsStream("gutenberg.txt");
         String content = new String(is.readAllBytes());
@@ -68,38 +75,144 @@ public class MainController {
         book.setId(1);
         bookRepository.save(book);
 
-//        System.err.println(bookRepository.getBookById(1).getContent());
+        //System.err.println(bookRepository.getBookById(1).getContent());
         //stem term
         List<String> tokens = testStem(bookRepository.getBookById(1).getContent());
-//        System.err.println(tokens.size());
+        //System.err.println(tokens.size());
 
         for (String s : tokens) {
             if (currentIndexes.contains(new Index(s, null))){
-//                System.err.println("word found");
+                //System.err.println("word found");
                 Index index = currentIndexes.get(currentIndexes.indexOf(new Index(s, null)));
                 if (!index.containsDocumentId(book.getId())){
-//                    System.err.println("book not found in index");
+                    //System.err.println("book not found in index");
                     index.addDocumentId(book);
                     indexes.add(index);
                 }
             }else {
-//                System.err.println("word not found");
+                //System.err.println("word not found");
                 indexes.add(new Index(s, Set.of(book)));
             }
         }
 
         indexRepository.saveAll(indexes);
 
-//        try {
-////            List<String> stemmed = testStem(bookRepository.getBookById(1).getContent());
-////            for (String s : stemmed) {
-////                //get all keys
-////            }
-//            return testStem(bookRepository.getBookById(1).getContent());
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return new ArrayList<>();
-//        }
+        //try {
+            ////List<String> stemmed = testStem(bookRepository.getBookById(1).getContent());
+            ////for (String s : stemmed) {
+                //////get all keys
+            ////}
+            //return testStem(bookRepository.getBookById(1).getContent());
+        //} catch (Exception e) {
+            //e.printStackTrace();
+            //return new ArrayList<>();
+        //}
         return "ok";
+    }
+
+    //uWu
+    @RequestMapping(value = "/regex", produces = "application/json")
+    public String regex(@RequestParam(value = "term", required = false) String term) {
+        if (term == null || term.equals("")) {
+            return null;
+        }else {
+            System.out.println("Matching books: ");
+            return "blep " + term;
+        }
+    }
+
+    @RequestMapping(value = "/regexSearch", produces = "application/json")
+    public List<Book> regexSearch(@RequestParam(value = "term", required = false) String term) {
+        System.out.println("Term: " + term);
+
+        if (term == null || term.equals("")) {
+            return Collections.emptyList();
+        } else {
+            // Obtenez tous les livres de la base de données
+            List<Book> allBooks = bookRepository.findAll();
+            System.out.println("All books: " + allBooks);
+
+            // Créez un motif à partir du terme de recherche
+            Pattern pattern = Pattern.compile(term);
+
+            // Filtrez les livres dont le contenu correspond au motif
+            List<Book> matchingBooks = allBooks.stream()
+                .filter(book -> {
+                    Matcher matcher = pattern.matcher(book.getContent());
+                    boolean matches = matcher.find();
+                    System.out.println("Book: " + book + " matches: " + matches);
+                    return matcher.find();
+                })
+                .collect(Collectors.toList());
+
+            System.out.println("Matching books: " + matchingBooks);
+            return matchingBooks;
+        }
+    }
+
+    @RequestMapping(value = "/regret", produces = "application/json")
+    public List<String> regret(@RequestParam(value = "term", required = false) String term) {
+        System.out.println("Term: " + term);
+
+        if (term == null || term.equals("")) {
+            return Collections.emptyList();
+        } else {
+            // Recherchez les livres dans la base de données qui correspondent au terme de recherche
+            List<Book> matchingBooks = bookRepository.findByContentContaining(term);
+            System.out.println("Matching books: " + matchingBooks);
+
+            // Créez un motif à partir du terme de recherche
+            Pattern pattern = Pattern.compile("\\b" + term + "\\b");
+
+            // Créez une liste pour stocker les mots clés trouvés
+            List<String> keywords = new ArrayList<>();
+
+            // Parcourez chaque livre correspondant
+            for (Book book : matchingBooks) {
+                // Parcourez chaque mot dans le contenu du livre
+                for (String word : book.getContent().split("\\s+")) {
+                    // Si le mot correspond au motif, ajoutez-le à la liste des mots clés
+                    Matcher matcher = pattern.matcher(word);
+                    if (matcher.find()) {
+                        keywords.add(word);
+                    }
+                }
+            }
+
+            return keywords;
+        }
+    }
+
+    @RequestMapping(value = "/regexSearcher", produces = "application/json")
+    public List<Book> regexSearcher(@RequestParam(value = "term", required = false) String term) {
+        System.out.println("Term: " + term);
+    
+        if (term == null || term.equals("")) {
+            return Collections.emptyList();
+        } else {
+            // Recherchez les livres dans la base de données qui correspondent au terme de recherche
+            List<Book> matchingBooks = bookRepository.findByContentRegex(term);
+            System.out.println("Matching books: " + matchingBooks.size());
+    
+            // Créez un motif à partir du terme de recherche
+            Pattern pattern = Pattern.compile("\\b" + term + "\\b");
+    
+            // Créez une liste pour stocker les mots clés trouvés
+            List<String> keywords = new ArrayList<>();
+    
+            // Parcourez chaque livre correspondant
+            for (Book book : matchingBooks) {
+                // Parcourez chaque mot dans le contenu du livre
+                for (String word : book.getContent().split("\\s+")) {
+                    // Si le mot correspond au motif, ajoutez-le à la liste des mots clés
+                    Matcher matcher = pattern.matcher(word);
+                    if (matcher.find()) {
+                        keywords.add(word);
+                    }
+                }
+            }
+    
+            return matchingBooks;
+        }
     }
 }
