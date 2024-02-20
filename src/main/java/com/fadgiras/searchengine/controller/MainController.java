@@ -22,12 +22,16 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+
 //UWU
 import java.util.regex.*;
 import java.util.stream.Collectors;
 import java.util.Collections;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 
 
 @RestController
@@ -111,6 +115,52 @@ public class MainController {
     }
 
     //uWu
+
+    @Autowired
+    public MainController(BookRepository bookRepository) {
+        this.bookRepository = bookRepository;
+    }
+
+    @RequestMapping(value = "/search/or", produces = "application/json")
+    public List<Book> searchOr(@RequestParam(value = "term1", required = false) String term1, @RequestParam(value = "term2", required = false) String term2) {
+        if (term1 == null || term1.equals("") || term2 == null || term2.equals("")) {
+            return Collections.emptyList();
+        } else {
+            List<Book> matchingBooks = bookRepository.findByContentRegex(term1, term2);
+            return matchingBooks;
+        }
+    }
+    
+    @RequestMapping(value = "/search/and", produces = "application/json")
+    public List<Book> searchAnd(@RequestParam(value = "term1", required = false) String term1, @RequestParam(value = "term2", required = false) String term2) {
+        if (term1 == null || term1.equals("") || term2 == null || term2.equals("")) {
+            return Collections.emptyList();
+        } else {
+            List<Book> matchingBooks = bookRepository.findByContentTwoTerms(term1, term2);
+            return matchingBooks;
+        }
+    }
+    
+    @RequestMapping(value = "/search/exact", produces = "application/json")
+    public List<Book> searchExact(@RequestParam(value = "term", required = false) String term) {
+        if (term == null || term.equals("")) {
+            return Collections.emptyList();
+        } else {
+            List<Book> matchingBooks = bookRepository.findByExactWord(term);
+            return matchingBooks;
+        }
+    }
+    
+    @RequestMapping(value = "/search/prefix", produces = "application/json")
+    public List<Book> searchPrefix(@RequestParam(value = "prefix", required = false) String prefix) {
+        if (prefix == null || prefix.equals("")) {
+            return Collections.emptyList();
+        } else {
+            List<Book> matchingBooks = bookRepository.findByContentPrefix(prefix);
+            return matchingBooks;
+        }
+    }
+
     @RequestMapping(value = "/regex", produces = "application/json")
     public String regex(@RequestParam(value = "term", required = false) String term) {
         if (term == null || term.equals("")) {

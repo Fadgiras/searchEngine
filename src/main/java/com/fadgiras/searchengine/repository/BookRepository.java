@@ -43,18 +43,18 @@ public interface BookRepository extends JpaRepository<Book, Integer> {
     List<Book> findByContentRegex(@Param("term") String term);
 
     //Recherche de plusieurs mots (recherche OR) :
-    // @Query(value="SELECT b.* FROM Book b WHERE b.content ~* :term1 OR b.content ~* :term2", nativeQuery = true)
-    // List<Book> findByContentRegex(@Param("term1") String term1, @Param("term2") String term2);
+    @Query(value="SELECT b.* FROM Book b WHERE b.content ~* :term1 OR b.content ~* :term2", nativeQuery = true)
+    List<Book> findByContentRegex(@Param("term1") String term1, @Param("term2") String term2);
 
     //Recherche de tous les mots (recherche AND) :
-    // @Query(value="SELECT b.* FROM Book b WHERE b.content ~* :term1 AND b.content ~* :term2", nativeQuery = true)
-    // List<Book> findByContentRegex(@Param("term1") String term1, @Param("term2") String term2);
+    @Query(value="SELECT b.* FROM Book b WHERE b.content ~* :term1 AND b.content ~* :term2", nativeQuery = true)
+    List<Book> findByContentTwoTerms(@Param("term1") String term1, @Param("term2") String term2);
 
     //Recherche de mots exacts (pas une sous-chaîne d'un mot plus long) :
-    // @Query(value="SELECT b.* FROM Book b WHERE b.content ~* '\\m:term\\M'", nativeQuery = true)
-    // List<Book> findByContentRegex(@Param("term") String term);
+    @Query(value="SELECT b.* FROM Book b WHERE b.content ~* '\\m:term\\M'", nativeQuery = true)
+    List<Book> findByExactWord(@Param("term") String term);
 
     //Recherche de mots avec un certain préfixe :
-    // @Query(value="SELECT b.* FROM Book b WHERE b.content ~* ':prefix\\w*'", nativeQuery = true)
-    // List<Book> findByContentPrefix(@Param("prefix") String prefix);
+    @Query(value="SELECT b.* FROM Book b WHERE b.content ~* ':prefix\\w*'", nativeQuery = true)
+    List<Book> findByContentPrefix(@Param("prefix") String prefix);
 }
