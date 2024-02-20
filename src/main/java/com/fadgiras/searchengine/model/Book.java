@@ -9,7 +9,7 @@ import static jakarta.persistence.FetchType.LAZY;
 public class Book {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
 
     @Column(name = "title", columnDefinition = "TEXT")
     private String title;
@@ -29,11 +29,11 @@ public class Book {
         this.content = content;
     }
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

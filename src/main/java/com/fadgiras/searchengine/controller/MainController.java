@@ -1,8 +1,10 @@
 package com.fadgiras.searchengine.controller;
 
 import com.fadgiras.searchengine.model.Book;
+import com.fadgiras.searchengine.model.Index;
 import com.fadgiras.searchengine.model.RIndex;
 import com.fadgiras.searchengine.repository.BookRepository;
+import com.fadgiras.searchengine.repository.IndexRepository;
 import com.fadgiras.searchengine.repository.RIndexRepository;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.StopFilter;
@@ -34,6 +36,9 @@ public class MainController {
 
     @Autowired
     BookRepository bookRepository;
+
+    @Autowired
+    IndexRepository indexRepository;
 
     Path path = Paths.get("src/main/resources/test");
 
@@ -72,7 +77,7 @@ public class MainController {
     @RequestMapping(value = "/rindex", produces = "application/json")
     public String rindex() throws Exception {
         //get index from database
-        List<RIndex> currentRIndexes = RIndexRepository.getAllIndexes();
+        List<RIndex> currentRIndexes = RIndexRepository.findAll();
         //get books from database
         List<Book> books = bookRepository.findAll();
         for(Book book : books) {
@@ -89,7 +94,7 @@ public class MainController {
             }
         }
 
-        System.err.println(currentRIndexes);
+//        System.err.println(currentRIndexes);
         RIndexRepository.saveAll(currentRIndexes.stream().toList());
         return "ok";
     }
@@ -132,7 +137,37 @@ public class MainController {
 
     @RequestMapping(value = "/rindexes", produces = "application/json")
     public List<RIndex> rindexes() {
-        return RIndexRepository.getAllIndexes();
+        return RIndexRepository.findAll();
     }
 
+    @RequestMapping(value = "/index", produces = "application/json")
+    public String index() {
+        //get index from database
+        List<Index> currentIndexes = indexRepository.findAll();
+        //get books from database
+        List<Book> books = bookRepository.findAll();
+
+        for (Book book : books) {
+            List<String> tokens = new ArrayList<>();
+            try {
+                tokens = stem(book.getContent());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            System.err.println(tokens);
+            for (String s : tokens) {
+                Index index = new Index(book, s, 1);
+                if (currentIndexes.contains(index)) {
+                    Index i = currentIndexes.get(currentIndexes.indexOf(index));
+                    i.setFrequency(i.getFrequency() + 1);
+                } else {
+                    currentIndexes.add(index);
+                }
+            }
+        }
+
+        indexRepository.saveAll(currentIndexes.stream().toList());
+
+        return "ok";
+    }
 }

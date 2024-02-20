@@ -10,10 +10,6 @@ import java.util.List;
 @Repository
 public interface RIndexRepository extends JpaRepository<RIndex, String> {
 
-    //get all indexes
-    @Query("SELECT i FROM RIndex i")
-    List<RIndex> getAllIndexes();
-
     //get index by word
     @Query("SELECT i FROM RIndex i WHERE i.word = ?1")
     RIndex getIndexByWord(String word);
