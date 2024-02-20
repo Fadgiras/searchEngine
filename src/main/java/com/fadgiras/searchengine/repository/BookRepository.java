@@ -9,6 +9,7 @@ import java.util.List;
 
 //UWU
 import java.util.regex.*;
+import org.springframework.data.repository.CrudRepository;
 
 @Repository
 public interface BookRepository extends JpaRepository<Book, Integer> {
@@ -57,4 +58,8 @@ public interface BookRepository extends JpaRepository<Book, Integer> {
     //Recherche de mots avec un certain préfixe :
     @Query(value="SELECT b.* FROM Book b WHERE b.content ~* ':prefix\\w*'", nativeQuery = true)
     List<Book> findByContentPrefix(@Param("prefix") String prefix);
+
+    //Recherche de mots en RegEx :
+    @Query(value = "SELECT b.* FROM Book b WHERE b.title ~* :regex", nativeQuery = true)
+    List<Book> findBooksByTitleWithRegex(@Param("regex") String regex);
 }

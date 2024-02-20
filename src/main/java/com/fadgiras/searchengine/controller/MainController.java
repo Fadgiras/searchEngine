@@ -25,6 +25,8 @@ import java.util.Set;
 
 //UWU
 import java.util.regex.*;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 import java.util.Collections;
 import java.util.stream.Stream;
@@ -264,5 +266,33 @@ public class MainController {
     
             return matchingBooks;
         }
+    }
+
+    @RequestMapping(value = "/extractWords", produces = "application/json")
+    public List<String> extractWords(@RequestParam(required = false) String text, @RequestParam(required = false) String regex) {
+        // Compiler l'expression régulière en un Pattern
+        Pattern pattern = Pattern.compile(regex);
+
+        // Créer un Matcher à partir du Pattern
+        Matcher matcher = pattern.matcher(text);
+
+        // Liste pour stocker les correspondances
+        List<String> matches = new ArrayList<>();
+
+        // Trouver et ajouter toutes les correspondances à la liste
+        while (matcher.find()) {
+            matches.add(matcher.group());
+        }
+
+        // Afficher le résultat
+        System.out.println("La chaîne de caractères correspond-elle à l'expression régulière ? " + matches);
+
+        // Retourner la liste des correspondances
+        return matches;
+    }
+
+    @RequestMapping(value = "/booksWithRegex", produces = "application/json")
+    public List<Book> getBooksWithRegex(@RequestParam String regex) {
+        return bookRepository.findBooksByTitleWithRegex(regex);
     }
 }
