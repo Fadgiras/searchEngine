@@ -24,7 +24,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @RestController
@@ -35,6 +34,8 @@ public class MainController {
 
     @Autowired
     BookRepository bookRepository;
+
+    Path path = Paths.get("src/main/resources/test");
 
     public List<String> stem(String term) throws Exception {
         Analyzer analyzer = new StandardAnalyzer();
@@ -51,65 +52,51 @@ public class MainController {
         return tokens;
     }
 
+    public String getAuthor(String content) {
+        String[] lines = content.split("\n");
+        for (String line : lines) {
+            if (line.contains("Author:")) {
+                return line.split(":")[1];
+            } else if (line.contains("START OF THE PROJECT GUTENBERG")) {
+                return "Unknown";
+            }
+        }
+        return "Unknown";
+    }
+
     @RequestMapping(value = "/search", produces = "application/json")
     public String search(@RequestParam(value = "q", required = false) String query) {
         return "You searched for: " + query;
     }
 
     @RequestMapping(value = "/rindex", produces = "application/json")
-    public String rindex(@RequestParam(value = "term", required = false) String term) throws Exception {
+    public String rindex() throws Exception {
         //get index from database
         List<RIndex> currentRIndexes = RIndexRepository.getAllIndexes();
-        List<RIndex> RIndexes = new ArrayList<>();
-        //get document id from database
-
-//        // test data
-        ClassLoader classloader = Thread.currentThread().getContextClassLoader();
-        InputStream is = classloader.getResourceAsStream("10000-0.txt");
-        String content = new String(is.readAllBytes());
-        Book book = new Book("title", "author", content);
-        book.setId(1);
-        bookRepository.save(book);
-
-        //System.err.println(bookRepository.getBookById(1).getContent());
-        //stem term
-        List<String> tokens = stem(bookRepository.getBookById(1).getContent());
-        //System.err.println(tokens.size());
-
-        for (String s : tokens) {
-            if (currentRIndexes.contains(new RIndex(s, null))) {
-                //System.err.println("word found");
-                RIndex RIndex = currentRIndexes.get(currentRIndexes.indexOf(new RIndex(s, null)));
-                if (!RIndex.containsDocumentId(book.getId())) {
-                    //System.err.println("book not found in index");
-                    RIndex.addDocumentId(book);
-                    RIndexes.add(RIndex);
+        //get books from database
+        List<Book> books = bookRepository.findAll();
+        for(Book book : books) {
+            System.err.println("processing book: " + book.getTitle());
+            List<String> tokens = stem(book.getContent());
+            for (String s : tokens) {
+                RIndex rIndex = new RIndex(s, new ArrayList<>(Set.of(book)));
+                if(currentRIndexes.contains(rIndex)) {
+                    RIndex r = currentRIndexes.get(currentRIndexes.indexOf(rIndex));
+                    r.getBooks().add(book);
+                } else {
+                    currentRIndexes.add(rIndex);
                 }
-            } else {
-                //System.err.println("word not found");
-                RIndexes.add(new RIndex(s, Set.of(book)));
             }
         }
 
-        RIndexRepository.saveAll(RIndexes);
-
-        //try {
-        //    List<String> stemmed = testStem(bookRepository.getBookById(1).getContent());
-        //    for (String s : stemmed) {
-        //get all keys
-        //    }
-        //    return testStem(bookRepository.getBookById(1).getContent());
-        //} catch (Exception e) {
-        //    e.printStackTrace();
-        //    return new ArrayList<>();
-        //}
+        System.err.println(currentRIndexes);
+        RIndexRepository.saveAll(currentRIndexes.stream().toList());
         return "ok";
     }
 
     @RequestMapping(value = "/refreshBooks", produces = "application/json")
     public String refreshBooks() {
         //get path of src folder
-        Path path = Paths.get("src/main/resources/test");
         ClassLoader classloader = Thread.currentThread().getContextClassLoader();
         List<Book> books = new ArrayList<>();
         //get each file in the folder
@@ -123,9 +110,11 @@ public class MainController {
             try {
                 InputStream is = classloader.getResourceAsStream("test/" + book);
                 String content = new String(is.readAllBytes());
-                // split the extension fron the file name
+                // split the extension from the file name
                 book = book.split("\\.")[0];
-                books.add(new Book(book, "author", content));
+                // get line containing "Author:"
+                String author = getAuthor(content);
+                books.add(new Book(book, author, content));
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -133,4 +122,17 @@ public class MainController {
         bookRepository.saveAll(books);
         return "ok";
     }
+
+    @RequestMapping(value = "/init", produces = "application/json")
+    public String init() throws Exception {
+        refreshBooks();
+        rindex();
+        return "ok";
+    }
+
+    @RequestMapping(value = "/rindexes", produces = "application/json")
+    public List<RIndex> rindexes() {
+        return RIndexRepository.getAllIndexes();
+    }
+
 }

@@ -2,7 +2,8 @@ package com.fadgiras.searchengine.model;
 
 import jakarta.persistence.*;
 
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "RIndex")
@@ -15,14 +16,15 @@ public class RIndex {
     @JoinTable(name = "reversed_index_book",
             joinColumns = { @JoinColumn(name = "word")},
             inverseJoinColumns = { @JoinColumn(name = "id")})
-    private Set<Book> documentIds;
+    private List<Book> books;
 
     public RIndex() {
+        this.books = new ArrayList<>();
     }
 
-    public RIndex(String word, Set<Book> documentIds) {
+    public RIndex(String word, List<Book> books) {
         this.word = word;
-        this.documentIds = documentIds;
+        this.books = new ArrayList<>(books);
     }
 
     public String getWord() {
@@ -33,31 +35,48 @@ public class RIndex {
         this.word = word;
     }
 
-    public Set<Book> getDocumentIds() {
-        return documentIds;
+    public List<Book> getBooks() {
+        return books;
     }
 
-    public void setDocumentIds(Set<Book> documentIds) {
-        this.documentIds = documentIds;
+    public void setBooks(ArrayList<Book> books) {
+        this.books = books;
     }
 
-    public void addDocumentId(Book document) {
-        documentIds.add(document);
+    public void addBook(Book document) {
+        books.add(document);
     }
 
     public void removeDocumentId(int documentId) {
-        documentIds.remove(documentId);
+        books.remove(documentId);
     }
 
     public boolean containsDocumentId(int documentId) {
-        return documentIds.contains(documentId);
+        return books.contains(documentId);
     }
 
     public int getDocumentCount() {
-        return documentIds.size();
+        return books.size();
     }
 
     public String toString() {
-        return "RIndex{word='" + word + "', documentIds=" + documentIds + "}";
+        return "RIndex{word='" + word + "', documentIds=" + books + "}";
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        RIndex rIndex = (RIndex) obj;
+        return word.equals(rIndex.word);
+    }
+
+    @Override
+    public int hashCode() {
+        return word.hashCode();
     }
 }
