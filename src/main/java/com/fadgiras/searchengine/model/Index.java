@@ -71,7 +71,8 @@ public class Index {
         if (this == o) return true;
         if (!(o instanceof Index)) return false;
         Index index = (Index) o;
-        return getFrequency() == index.getFrequency() && getBook().equals(index.getBook()) && getWord().equals(index.getWord());
+        // need to compare only the word and the book
+        return getBook().equals(index.getBook()) && getWord().equals(index.getWord());
     }
 
     @Override

@@ -26,4 +26,7 @@ public interface RIndexRepository extends JpaRepository<RIndex, String> {
 //    @Query("SELECT i FROM RIndex i WHERE ?1 IN i.books")
 //    RIndex getIndexByBookId(int bookId);
 
+    @Query("SELECT true FROM RIndex i WHERE i.word = ?1")
+    Boolean existsByWord(String word);
+
 }

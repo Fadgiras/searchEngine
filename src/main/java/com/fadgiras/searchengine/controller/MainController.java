@@ -28,6 +28,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @RestController
 public class MainController {
 
@@ -39,6 +42,8 @@ public class MainController {
 
     @Autowired
     IndexRepository indexRepository;
+
+    private static final Logger logger = LoggerFactory.getLogger(MainController.class);
 
     Path path = Paths.get("src/main/resources/test");
 
@@ -87,7 +92,9 @@ public class MainController {
                 RIndex rIndex = new RIndex(s, new ArrayList<>(Set.of(book)));
                 if(currentRIndexes.contains(rIndex)) {
                     RIndex r = currentRIndexes.get(currentRIndexes.indexOf(rIndex));
-                    r.getBooks().add(book);
+                    if (!r.getBooks().contains(book)) {
+                        r.addBook(book);
+                    }
                 } else {
                     currentRIndexes.add(rIndex);
                 }
@@ -96,6 +103,89 @@ public class MainController {
 
 //        System.err.println(currentRIndexes);
         RIndexRepository.saveAll(currentRIndexes.stream().toList());
+        return "ok";
+    }
+
+    @RequestMapping(value = "/index", produces = "application/json")
+    public String index() {
+        //get index from database
+        List<Index> currentIndexes = indexRepository.findAll();
+        //get books from database
+        List<Book> books = bookRepository.findAll();
+
+        for (Book book : books) {
+            List<String> tokens = new ArrayList<>();
+            try {
+                tokens = stem(book.getContent());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            for (String s : tokens) {
+                Index index = new Index(book, s, 1);
+                if (currentIndexes.contains(index)) {
+                    Index i = currentIndexes.get(currentIndexes.indexOf(index));
+                    i.setFrequency(i.getFrequency() + 1);
+                } else {
+                    currentIndexes.add(index);
+                }
+            }
+        }
+        indexRepository.saveAll(currentIndexes.stream().toList());
+
+        return "ok";
+    }
+
+    @RequestMapping(value = "/indexer", produces = "application/json")
+    public String indexer() {
+
+        //get books from database
+        List<Book> books = bookRepository.findAll();
+
+        for (Book book : books) {
+            //get index from database
+            List<Index> currentIndexes = indexRepository.findAll();
+            List<RIndex> currentRIndexes = RIndexRepository.findAll();
+
+            System.err.println("processing book: " + book.getTitle());
+            logger.info("processing book: " + book.getTitle());
+            List<String> tokens = new ArrayList<>();
+            try {
+                logger.info("stemming book: " + book.getTitle());
+                tokens = stem(book.getContent());
+                logger.info("stemmed book: " + book.getTitle());
+                logger.info("tokens: " + tokens.size());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            logger.info("processing words");
+            for (String s : tokens) {
+//                logger.info("processing word: " + s);
+                Index index = new Index(book, s, 1);
+                RIndex rIndex = new RIndex(s, new ArrayList<>(Set.of(book)));
+
+                if (currentIndexes.contains(index)) {
+                    Index i = currentIndexes.get(currentIndexes.indexOf(index));
+                    i.setFrequency(i.getFrequency() + 1);
+                } else {
+                    currentIndexes.add(index);
+                }
+                if(currentRIndexes.contains(rIndex)) {
+                    RIndex r = currentRIndexes.get(currentRIndexes.indexOf(rIndex));
+                    if (!r.getBooks().contains(book)) {
+                        r.addBook(book);
+                    }
+                } else {
+                    currentRIndexes.add(rIndex);
+                }
+            }
+            logger.info("processed words");
+            logger.info("saving indexes");
+            RIndexRepository.saveAll(currentRIndexes.stream().toList());
+            indexRepository.saveAll(currentIndexes.stream().toList());
+            logger.info("saved indexes");
+        }
+
+
         return "ok";
     }
 
@@ -131,43 +221,12 @@ public class MainController {
     @RequestMapping(value = "/init", produces = "application/json")
     public String init() throws Exception {
         refreshBooks();
-        rindex();
+        indexer();
         return "ok";
     }
 
     @RequestMapping(value = "/rindexes", produces = "application/json")
     public List<RIndex> rindexes() {
         return RIndexRepository.findAll();
-    }
-
-    @RequestMapping(value = "/index", produces = "application/json")
-    public String index() {
-        //get index from database
-        List<Index> currentIndexes = indexRepository.findAll();
-        //get books from database
-        List<Book> books = bookRepository.findAll();
-
-        for (Book book : books) {
-            List<String> tokens = new ArrayList<>();
-            try {
-                tokens = stem(book.getContent());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            System.err.println(tokens);
-            for (String s : tokens) {
-                Index index = new Index(book, s, 1);
-                if (currentIndexes.contains(index)) {
-                    Index i = currentIndexes.get(currentIndexes.indexOf(index));
-                    i.setFrequency(i.getFrequency() + 1);
-                } else {
-                    currentIndexes.add(index);
-                }
-            }
-        }
-
-        indexRepository.saveAll(currentIndexes.stream().toList());
-
-        return "ok";
     }
 }

@@ -15,4 +15,6 @@ public interface IndexRepository extends JpaRepository<Index, Book> {
 
     @Query("SELECT i FROM Index i WHERE i.book = ?1 AND i.word = ?2")
     Index getIndexByBookAndWord(Book book, String word);
+
+
 }
