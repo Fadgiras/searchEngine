@@ -143,8 +143,12 @@ public class MainController {
 
         for (Book book : books) {
             //get index from database
-            List<Index> currentIndexes = indexRepository.findAll();
-            List<RIndex> currentRIndexes = RIndexRepository.findAll();
+            List<Index> allIndexes = indexRepository.findAll();
+            List<RIndex> allRIndexes = RIndexRepository.findAll();
+
+            //TODO Use this to store new indexes
+            List<Index> currentIndexes = new ArrayList<>();
+            List<RIndex> currentRIndexes = new ArrayList<>();
 
             System.err.println("processing book: " + book.getTitle());
             logger.info("processing book: " + book.getTitle());
@@ -163,25 +167,37 @@ public class MainController {
                 Index index = new Index(book, s, 1);
                 RIndex rIndex = new RIndex(s, new ArrayList<>(Set.of(book)));
 
-                if (currentIndexes.contains(index)) {
-                    Index i = currentIndexes.get(currentIndexes.indexOf(index));
+
+//                logger.info("Pre exists");
+                Boolean exists = indexRepository.existsByWordAndBook(book, s)!=null ? indexRepository.existsByWordAndBook(book, s) : false;
+                Boolean rexists = RIndexRepository.existsByWord(s)!=null ? RIndexRepository.existsByWord(s) : false;
+//                logger.info("Post exists");
+
+//                logger.info(exists.toString());
+//                logger.info(rexists.toString());
+
+                if (exists) {
+//                    logger.info("Exist");
+//                    System.err.println(currentIndexes);
+                    Index i = allIndexes.get(allIndexes.indexOf(index));
                     i.setFrequency(i.getFrequency() + 1);
                 } else {
-                    currentIndexes.add(index);
+                    allIndexes.add(index);
                 }
-                if(currentRIndexes.contains(rIndex)) {
-                    RIndex r = currentRIndexes.get(currentRIndexes.indexOf(rIndex));
+                if(rexists) {
+//                    logger.info("RExist");
+                    RIndex r = allRIndexes.get(allRIndexes.indexOf(rIndex));
                     if (!r.getBooks().contains(book)) {
                         r.addBook(book);
                     }
                 } else {
-                    currentRIndexes.add(rIndex);
+                    allRIndexes.add(rIndex);
                 }
             }
             logger.info("processed words");
             logger.info("saving indexes");
-            RIndexRepository.saveAll(currentRIndexes.stream().toList());
-            indexRepository.saveAll(currentIndexes.stream().toList());
+            RIndexRepository.saveAll(allRIndexes.stream().toList());
+            indexRepository.saveAll(allIndexes.stream().toList());
             logger.info("saved indexes");
         }
 
