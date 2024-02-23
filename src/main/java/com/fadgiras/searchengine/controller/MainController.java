@@ -191,7 +191,7 @@ public class MainController {
             }
             logger.info("processing words");
             for (String s : tokens) {
-                logger.info("processing word: " + s);
+//                logger.info("processing word: " + s);
                 Index index = new Index(book, s, 1);
 //                RIndex rIndex = new RIndex(s, new ArrayList<>(Set.of(book)));
 
