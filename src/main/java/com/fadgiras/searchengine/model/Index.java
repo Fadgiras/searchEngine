@@ -21,7 +21,7 @@ public class Index {
     }
 
     @Id
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, cascade = CascadeType.ALL)
     @JoinColumn(name = "id", nullable = false)
     Book book;
 

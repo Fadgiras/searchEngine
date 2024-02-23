@@ -20,6 +20,9 @@ public class Book {
     @Column(name = "content", columnDefinition = "TEXT")
     private String content;
 
+    @Column(name = "tokens")
+    private int tokens;
+
     public Book() {
     }
 
@@ -27,6 +30,13 @@ public class Book {
         this.title = title;
         this.author = author;
         this.content = content;
+    }
+
+    public Book(String title, String author, String content, int tokens) {
+        this.title = title;
+        this.author = author;
+        this.content = content;
+        this.tokens = tokens;
     }
 
     public Long getId() {
@@ -61,8 +71,22 @@ public class Book {
         this.content = content;
     }
 
+    public int getTokens() {
+        return tokens;
+    }
+
+    public void setTokens(int tokens) {
+        this.tokens = tokens;
+    }
+
     public String toString() {
-        return "Book{id=" + id + ", title='" + title + "', author='" + author + "', content='" + content + "'}";
+        return "Book{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", author='" + author + '\'' +
+                ", content='" + content + '\'' +
+                ", tokens='" + tokens + '\'' +
+                '}';
     }
 
 }

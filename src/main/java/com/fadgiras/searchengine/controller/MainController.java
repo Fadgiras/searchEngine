@@ -1,5 +1,6 @@
 package com.fadgiras.searchengine.controller;
 
+import com.fadgiras.searchengine.dto.BookCardDTO;
 import com.fadgiras.searchengine.model.Book;
 import com.fadgiras.searchengine.model.Index;
 import com.fadgiras.searchengine.model.RIndex;
@@ -7,12 +8,14 @@ import com.fadgiras.searchengine.repository.BookRepository;
 import com.fadgiras.searchengine.repository.IndexRepository;
 import com.fadgiras.searchengine.repository.RIndexRepository;
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.CharArraySet;
 import org.apache.lucene.analysis.StopFilter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.analysis.en.PorterStemFilter;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+import org.apache.lucene.search.similarities.ClassicSimilarity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -45,21 +48,37 @@ public class MainController {
 
     private static final Logger logger = LoggerFactory.getLogger(MainController.class);
 
+    private CharArraySet stopWords = new CharArraySet(EnglishAnalyzer.getDefaultStopSet(), false);
+
+    //Will use this in future versions to score properly, for now, we will use homebrewed scoring
+    //ClassicSimilarity similarity = new ClassicSimilarity();
+
     Path path = Paths.get("src/main/resources/test");
 
-    public List<String> stem(String term) throws Exception {
-        Analyzer analyzer = new StandardAnalyzer();
-        TokenStream result = analyzer.tokenStream(null, term);
-        result = new PorterStemFilter(result);
-        result = new StopFilter(result, EnglishAnalyzer.ENGLISH_STOP_WORDS_SET);
-        CharTermAttribute resultAttr = result.addAttribute(CharTermAttribute.class);
-        result.reset();
+    public List<String> stem(String term) {
+        try {
+            stopWords.add("gutenberg");
+            stopWords.add("ebook");
+            stopWords.add("ebooks");
+            stopWords.add("project");
+            stopWords.add("www");
 
-        List<String> tokens = new ArrayList<>();
-        while (result.incrementToken()) {
-            tokens.add(resultAttr.toString());
+            Analyzer analyzer = new StandardAnalyzer();
+            TokenStream result = analyzer.tokenStream(null, term);
+            result = new PorterStemFilter(result);
+            result = new StopFilter(result, stopWords);
+            CharTermAttribute resultAttr = result.addAttribute(CharTermAttribute.class);
+            result.reset();
+
+            List<String> tokens = new ArrayList<>();
+            while (result.incrementToken()) {
+                tokens.add(resultAttr.toString());
+            }
+            return tokens;
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        return tokens;
+        return null;
     }
 
     public String getAuthor(String content) {
@@ -75,8 +94,16 @@ public class MainController {
     }
 
     @RequestMapping(value = "/search", produces = "application/json")
-    public String search(@RequestParam(value = "q", required = false) String query) {
-        return "You searched for: " + query;
+    public List<BookCardDTO> search(@RequestParam(value = "q", required = false) String query) {
+        //TODO make a fail safe for stop words stemming
+        query = stem(query).get(0);
+        List<BookCardDTO> foundBooks = new ArrayList<>();
+        List<Book> books = indexRepository.findBooksByWord(query);
+
+        for (Book book : books) {
+            foundBooks.add(new BookCardDTO(book));
+        }
+        return foundBooks;
     }
 
     @RequestMapping(value = "/rindex", produces = "application/json")
@@ -143,14 +170,15 @@ public class MainController {
 
         for (Book book : books) {
             //get index from database
-            List<Index> allIndexes = indexRepository.findAll();
-            List<RIndex> allRIndexes = RIndexRepository.findAll();
+            //TODO: Maybe select only book related indexes
+            List<Index> allIndexes = indexRepository.getIndexByBook(book);
+//            List<RIndex> allRIndexes = RIndexRepository.findAll();
 
-            //TODO Use this to store new indexes
+
             List<Index> currentIndexes = new ArrayList<>();
             List<RIndex> currentRIndexes = new ArrayList<>();
 
-            System.err.println("processing book: " + book.getTitle());
+
             logger.info("processing book: " + book.getTitle());
             List<String> tokens = new ArrayList<>();
             try {
@@ -163,14 +191,15 @@ public class MainController {
             }
             logger.info("processing words");
             for (String s : tokens) {
-//                logger.info("processing word: " + s);
+                logger.info("processing word: " + s);
                 Index index = new Index(book, s, 1);
-                RIndex rIndex = new RIndex(s, new ArrayList<>(Set.of(book)));
+//                RIndex rIndex = new RIndex(s, new ArrayList<>(Set.of(book)));
 
 
 //                logger.info("Pre exists");
-                Boolean exists = indexRepository.existsByWordAndBook(book, s)!=null ? indexRepository.existsByWordAndBook(book, s) : false;
-                Boolean rexists = RIndexRepository.existsByWord(s)!=null ? RIndexRepository.existsByWord(s) : false;
+                Boolean exists = allIndexes.contains(index);
+//                Boolean exists = indexRepository.existsByWordAndBook(book, s)!=null ? indexRepository.existsByWordAndBook(book, s) : false;
+//                Boolean rexists = RIndexRepository.existsByWord(s)!=null ? RIndexRepository.existsByWord(s) : false;
 //                logger.info("Post exists");
 
 //                logger.info(exists.toString());
@@ -181,22 +210,24 @@ public class MainController {
 //                    System.err.println(currentIndexes);
                     Index i = allIndexes.get(allIndexes.indexOf(index));
                     i.setFrequency(i.getFrequency() + 1);
+//                    logger.info(Integer.valueOf(i.getFrequency()).toString());
+//                    logger.info(Integer.valueOf(allIndexes.get(allIndexes.indexOf(i)).getFrequency()).toString());
                 } else {
                     allIndexes.add(index);
                 }
-                if(rexists) {
+//                if(rexists) {
 //                    logger.info("RExist");
-                    RIndex r = allRIndexes.get(allRIndexes.indexOf(rIndex));
-                    if (!r.getBooks().contains(book)) {
-                        r.addBook(book);
-                    }
-                } else {
-                    allRIndexes.add(rIndex);
-                }
+//                    RIndex r = allRIndexes.get(allRIndexes.indexOf(rIndex));
+//                    if (!r.getBooks().contains(book)) {
+//                        r.addBook(book);
+//                    }
+//                } else {
+//                    allRIndexes.add(rIndex);
+//                }
             }
             logger.info("processed words");
             logger.info("saving indexes");
-            RIndexRepository.saveAll(allRIndexes.stream().toList());
+//            RIndexRepository.saveAll(allRIndexes.stream().toList());
             indexRepository.saveAll(allIndexes.stream().toList());
             logger.info("saved indexes");
         }
@@ -237,6 +268,7 @@ public class MainController {
     @RequestMapping(value = "/init", produces = "application/json")
     public String init() throws Exception {
         refreshBooks();
+        updateNumberOfTokens();
         indexer();
         return "ok";
     }
@@ -245,4 +277,30 @@ public class MainController {
     public List<RIndex> rindexes() {
         return RIndexRepository.findAll();
     }
+
+    @RequestMapping(value = "/tokens", produces = "application/json")
+    public String updateNumberOfTokens() throws Exception {
+        //get index from database
+        List<Book> books = bookRepository.findAll();
+        for (Book book : books) {
+            List<String> tokens = stem(book.getContent());
+            book.setTokens(tokens.size());
+        }
+        bookRepository.saveAll(books);
+        return "ok";
+    }
+
+    @RequestMapping(value = "/tf", produces = "application/json")
+    public Double getTf(@RequestParam(value = "book") String bookTitle, @RequestParam(value = "word") String word) throws Exception {
+        String stemmedWord = stem(word).get(0);
+        Book book = bookRepository.getBookByTitle(bookTitle);
+        List<Index> indexes = indexRepository.findIndexByBookAndWord(book, stemmedWord);
+        if (indexes.size() == 0) {
+            return 0.0;
+        }
+        return (double) indexes.get(0).getFrequency() / book.getTokens();
+    }
+
+
+    //regex -> list words -> search books containing words -> tfidf -> top 5
 }
