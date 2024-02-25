@@ -96,21 +96,35 @@ public class MainController {
         if (query == null) {
             return new ArrayList<>();
         }else {
-            query = stem(query).get(0) != null ? stem(query).get(0) : "";
-//            System.err.println("query: " + query);
             List<BookCardDTO> foundBooks = new ArrayList<>();
-            List<Book> books = indexRepository.findBooksByWord(query);
+            List<Book> bookBuffer = new ArrayList<>();
+
 //            System.err.println("books: " + books.size());
 
             Map<BookCardDTO, Double> scores = new HashMap<>();
-            Double idf = idf(query, books);
-//            System.err.println("idf: " + idf);
-            for (Book book : books) {
-                Double tf = tf(book, query);
-                Double tfidf = tf * idf;
-                scores.put(new BookCardDTO(book), tfidf);
-                //System.err.println(scores.values());
+
+            for (String s : stem(query)) {
+                if (s != null) {
+                    List<Book> books = indexRepository.findBooksByWord(s);
+                    if (bookBuffer.isEmpty()) {
+                        bookBuffer = books;
+                    } else {
+                        bookBuffer.retainAll(books);
+                    }
+                    Double idf = idf(s, books);
+                    for (Book book : bookBuffer) {
+                        Double tf = tf(book, s);
+                        Double tfidf = tf * idf;
+                        scores.put(new BookCardDTO(book), tfidf);
+                        //System.err.println(scores.values());
+                    }
+                }
             }
+
+//            System.err.println("query: " + query);
+
+//            System.err.println("idf: " + idf);
+
             //sort the scores
             scores.entrySet().stream()
                     .sorted((k1, k2) -> -k1.getValue().compareTo(k2.getValue()))
