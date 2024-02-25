@@ -24,9 +24,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.File;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import org.slf4j.Logger;
@@ -47,6 +50,8 @@ public class MainController {
     private static final Logger logger = LoggerFactory.getLogger(MainController.class);
 
     private CharArraySet stopWords = new CharArraySet(EnglishAnalyzer.getDefaultStopSet(), false);
+
+    private static final Pattern TEST_PATTERN = Pattern.compile("\\b(re){1}(\\w){1,}\\b");
 
     //Will use this in future versions to score properly, for now, we will use homebrewed scoring
     //ClassicSimilarity similarity = new ClassicSimilarity();
@@ -91,20 +96,46 @@ public class MainController {
     }
 
     @RequestMapping(value = "/search", produces = "application/json")
-    public List<BookCardDTO> search(@RequestParam(value = "q", required = false) String query) {
+    public List<BookCardDTO> search(@RequestParam(value = "q", required = false) String query, @RequestParam(value = "r", required = false, defaultValue = "false") boolean r) throws UnsupportedEncodingException {
         //TODO make a fail safe for stop words stemming
         if (query == null) {
             return new ArrayList<>();
         }else {
             List<BookCardDTO> foundBooks = new ArrayList<>();
             List<Book> bookBuffer = new ArrayList<>();
-
-//            System.err.println("books: " + books.size());
-
             Map<BookCardDTO, Double> scores = new HashMap<>();
-
-            for (String s : stem(query)) {
-                if (s != null) {
+            if (!r) {
+                for (String s : stem(query)) {
+                    if (s != null) {
+                        List<Book> books = indexRepository.findBooksByWord(s);
+                        if (bookBuffer.isEmpty()) {
+                            bookBuffer = books;
+                        } else {
+                            bookBuffer.retainAll(books);
+                        }
+                        Double idf = idf(s, books);
+                        for (Book book : bookBuffer) {
+                            Double tf = tf(book, s);
+                            Double tfidf = tf * idf;
+                            scores.put(new BookCardDTO(book), tfidf);
+                        }
+                    }
+                }
+            }else {
+                query = URLDecoder.decode(query, "UTF-8");
+                //fecth all words that match the regex
+                Pattern pattern = Pattern.compile(query);
+                List<Index> indexes = indexRepository.findAll();
+                List<String> words = new ArrayList<>();
+                for (Index index : indexes) {
+                    if (pattern.matcher(index.getWord()).matches()) {
+                        if (!words.contains(index.getWord())) {
+                            words.add(index.getWord());
+                        }
+                    }
+                }
+                //get books that contain the words
+                for (String s : words) {
                     List<Book> books = indexRepository.findBooksByWord(s);
                     if (bookBuffer.isEmpty()) {
                         bookBuffer = books;
@@ -116,15 +147,10 @@ public class MainController {
                         Double tf = tf(book, s);
                         Double tfidf = tf * idf;
                         scores.put(new BookCardDTO(book), tfidf);
-                        //System.err.println(scores.values());
                     }
                 }
+
             }
-
-//            System.err.println("query: " + query);
-
-//            System.err.println("idf: " + idf);
-
             //sort the scores
             scores.entrySet().stream()
                     .sorted((k1, k2) -> -k1.getValue().compareTo(k2.getValue()))
