@@ -45,4 +45,13 @@ public class BookCardDTO {
     public void setAuthor(String author) {
         this.author = author;
     }
+
+    @Override
+    public String toString() {
+        return "BookCardDTO{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", author='" + author + '\'' +
+                '}';
+    }
 }

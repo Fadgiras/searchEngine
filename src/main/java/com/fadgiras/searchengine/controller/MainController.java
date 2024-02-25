@@ -26,9 +26,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Stream;
 
 import org.slf4j.Logger;
@@ -76,9 +74,8 @@ public class MainController {
             }
             return tokens;
         } catch (Exception e) {
-            e.printStackTrace();
+            return null;
         }
-        return null;
     }
 
     public String getAuthor(String content) {
@@ -96,14 +93,30 @@ public class MainController {
     @RequestMapping(value = "/search", produces = "application/json")
     public List<BookCardDTO> search(@RequestParam(value = "q", required = false) String query) {
         //TODO make a fail safe for stop words stemming
-        query = stem(query).get(0);
-        List<BookCardDTO> foundBooks = new ArrayList<>();
-        List<Book> books = indexRepository.findBooksByWord(query);
+        if (query == null) {
+            return new ArrayList<>();
+        }else {
+            query = stem(query).get(0) != null ? stem(query).get(0) : "";
+//            System.err.println("query: " + query);
+            List<BookCardDTO> foundBooks = new ArrayList<>();
+            List<Book> books = indexRepository.findBooksByWord(query);
+//            System.err.println("books: " + books.size());
 
-        for (Book book : books) {
-            foundBooks.add(new BookCardDTO(book));
+            Map<BookCardDTO, Double> scores = new HashMap<>();
+            Double idf = idf(query, books);
+//            System.err.println("idf: " + idf);
+            for (Book book : books) {
+                Double tf = tf(book, query);
+                Double tfidf = tf * idf;
+                scores.put(new BookCardDTO(book), tfidf);
+                //System.err.println(scores.values());
+            }
+            //sort the scores
+            scores.entrySet().stream()
+                    .sorted((k1, k2) -> -k1.getValue().compareTo(k2.getValue()))
+                    .forEach(k -> foundBooks.add(k.getKey()));
+            return foundBooks;
         }
-        return foundBooks;
     }
 
     @RequestMapping(value = "/rindex", produces = "application/json")
@@ -170,7 +183,6 @@ public class MainController {
 
         for (Book book : books) {
             //get index from database
-            //TODO: Maybe select only book related indexes
             List<Index> allIndexes = indexRepository.getIndexByBook(book);
 //            List<RIndex> allRIndexes = RIndexRepository.findAll();
 
@@ -294,13 +306,39 @@ public class MainController {
     public Double getTf(@RequestParam(value = "book") String bookTitle, @RequestParam(value = "word") String word) throws Exception {
         String stemmedWord = stem(word).get(0);
         Book book = bookRepository.getBookByTitle(bookTitle);
-        List<Index> indexes = indexRepository.findIndexByBookAndWord(book, stemmedWord);
-        if (indexes.size() == 0) {
+        Index index = indexRepository.findIndexByBookAndWord(book, stemmedWord);
+        if (index == null) {
             return 0.0;
         }
-        return (double) indexes.get(0).getFrequency() / book.getTokens();
+        return (double) index.getFrequency() / book.getTokens();
     }
 
+    public Double tf(Book book, String word) {
+        //tf(t,d) = n/N
+        //n is the number of times term t appears in the document d.
+        //N is the total number of terms in the document d.
+
+        int n = indexRepository.findIndexByBookAndWord(book, word).getFrequency();
+        int N = book.getTokens();
+
+        return (double) n / N;
+    }
+
+    public Double idf(String word, List<Book> books) {
+        //idf(t,D) = log (N/( n))
+        //N is the number of documents in the data set.
+        //n is the number of documents that contain the term t among the data set.
+        int N = bookRepository.findAll().size();
+//        System.err.println("N: " + N);
+        int n = indexRepository.findBooksByWord(word).size();
+//        System.err.println("n: " + n);
+
+        return Math.log(N / n);
+    }
+
+    public Double tfidf(Book book, String word, List<Book> books) {
+        return tf(book, word) * idf(word, books);
+    }
 
     //regex -> list words -> search books containing words -> tfidf -> top 5
 }

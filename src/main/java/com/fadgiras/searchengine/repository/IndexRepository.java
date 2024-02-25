@@ -16,7 +16,7 @@ public interface IndexRepository extends JpaRepository<Index, Book> {
     List<Index> getIndexByBook(Book book);
 
     @Query("SELECT i FROM Index i WHERE i.book = ?1 AND i.word = ?2")
-    List<Index> findIndexByBookAndWord(Book book, String word);
+    Index findIndexByBookAndWord(Book book, String word);
 
     @Query("SELECT true FROM Index i WHERE i.book = ?1 AND i.word = ?2")
     Boolean existsByWordAndBook(Book book, String word);
@@ -27,4 +27,9 @@ public interface IndexRepository extends JpaRepository<Index, Book> {
     //get all books that contain the word
     @Query("SELECT i.book FROM Index i WHERE i.word = ?1")
     List<Book> findBooksByWord(String word);
+
+    //get all books that contain the word in list of books
+    @Query("SELECT i.book FROM Index i WHERE i.word = ?1 AND i.book IN ?2")
+    List<Book> findBooksByWordInList(String word, List<Book> books);
+
 }
