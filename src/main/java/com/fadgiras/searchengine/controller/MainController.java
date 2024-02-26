@@ -53,6 +53,8 @@ public class MainController {
 
     private static final Pattern TEST_PATTERN = Pattern.compile("\\b(re){1}(\\w){1,}\\b");
 
+    private static final Double DEFAULT_BOOST = 1.0;
+
     //Will use this in future versions to score properly, for now, we will use homebrewed scoring
     //ClassicSimilarity similarity = new ClassicSimilarity();
 
@@ -105,6 +107,7 @@ public class MainController {
             List<Book> bookBuffer = new ArrayList<>();
             Map<BookCardDTO, Double> scores = new HashMap<>();
             if (!r) {
+                Double boost = DEFAULT_BOOST;
                 for (String s : stem(query)) {
                     if (s != null) {
                         List<Book> books = indexRepository.findBooksByWord(s);
@@ -117,8 +120,11 @@ public class MainController {
                         for (Book book : bookBuffer) {
                             Double tf = tf(book, s);
                             Double tfidf = tf * idf;
-                            scores.put(new BookCardDTO(book), tfidf);
+                            scores.put(new BookCardDTO(book), tfidf + boost);
                         }
+                    }
+                    if (boost > 0.0) {
+                        boost -= 0.2;
                     }
                 }
             }else {
@@ -146,7 +152,9 @@ public class MainController {
                     for (Book book : bookBuffer) {
                         Double tf = tf(book, s);
                         Double tfidf = tf * idf;
-                        scores.put(new BookCardDTO(book), tfidf);
+                        if (!scores.containsKey(new BookCardDTO(book))) {
+                            scores.put(new BookCardDTO(book), tfidf);
+                        }
                     }
                 }
 
@@ -381,4 +389,9 @@ public class MainController {
     }
 
     //regex -> list words -> search books containing words -> tfidf -> top 5
+
+    @RequestMapping(value = "/getBook", produces = "application/json")
+    public Book getBook(@RequestParam(value = "id") int id) {
+        return bookRepository.getBookById(id);
+    }
 }
