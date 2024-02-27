@@ -1,0 +1,39 @@
+.search-bar {
+  position: relative;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%; /* Prendre la largeur complète */
+  padding: 10px 20px; /* Ajouter du rembourrage */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Ajouter une ombre */
+  z-index: 999; /* Assurez-vous que le composant reste au-dessus du contenu */
+}
+
+.input {
+  flex: 1;
+  margin-right: 10px; /* Ajoute de l'espace entre la barre et le bouton */
+  padding: 12px;
+  font-size: 16px;
+  border: 2px solid #ddd;
+  border-radius: 25px;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+.input:focus {
+  border-color: #007bff;
+}
+
+.button {
+  padding: 12px 20px;
+  font-size: 16px;
+  background-color: #384454;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.button:hover {
+  background-color: #E1A624;
+}

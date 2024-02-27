@@ -1,8 +1,10 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import './Recherches.css';
 import './../../styles/pages.css';
 // import Header from "../../components/Header";
+import axios from "axios";
 
+//--------------Barre de recherche----------------//
 const Recherches: React.FC = () => {
   const [searchType, setSearchType] = useState<'id' | 'author' | 'text'>('id');
   const [searchValue, setSearchValue] = useState('');
@@ -17,8 +19,33 @@ const Recherches: React.FC = () => {
     }
   };
 
+//--------------recherche JSON----------------//
+  const Endpoint = "https://jsonplaceholder.typicode.com/users";
+  const [userData, setUserData] = useState([]);
+  const getUserData = async () => {
+    try {
+      const fetchData = await axios.get(Endpoint, {
+        headers: {
+          authorization: "Bearer JWT Token",
+        },
+      });
+      setUserData(fetchData.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  useEffect(() => {
+    window.addEventListener("load", getUserData);
+    console.log(userData);
+    return () => {
+      window.removeEventListener("load", getUserData);
+    };
+  }, [userData]);
+
   return (
     <>
+
+      {/* --------------Barre de recherche---------------- */}
       <div className="flex items-center space-x-2">
         <select value={searchType} onChange={(e) => setSearchType(e.target.value as 'id' | 'author' | 'text')} className="border p-2 rounded">
           <option value="id">ID</option>
@@ -27,6 +54,20 @@ const Recherches: React.FC = () => {
         </select>
         <input type="text" value={searchValue} onChange={(e) => setSearchValue(e.target.value)} className="border p-2 rounded flex-grow" />
         <button onClick={handleSearch} className="bg-blue-500 text-white p-2 rounded">Rechercher</button>
+      </div>
+
+      {/* --------------recherche JSON---------------- */}
+      <div className="container mt-5">
+        <h2 className="mb-4">React Read Dynamic List Values Example</h2>
+        {userData.map((item: { id: number, username: string }) => {
+          return (
+            <li className="card p-3 mb-2" key={item.id}>
+              <div className="card-body">
+                <p className="card-text">{item.username}</p>
+              </div>
+            </li>
+          );
+        })}
       </div>
 
       {/* <div className="tss-1l4p3k-root MuiBox-root mui-0" style={{ "--banner-height": "450px" } as React.CSSProperties}>
