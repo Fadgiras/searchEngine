@@ -39,22 +39,59 @@ const Livres = () => {
           <br></br>
           <br></br>
 
-          <div className='grid grid-cols-none'>
+          <div className='grid grid-cols-4 gap-4 grid-flow-row auto-rows-[minmax(0,_2fr)]'>
               <BookCard
                   title="Titre du Livre 1"
                   author="Auteur 1"
-                  /*coverImage="https://example.com/book1-cover.jpg"*/
+                  coverImage="https://d.wattpad.com/story_parts/836439491/images/15f14bc9f0e4e3b2605738069606.png"
               />
 
               <BookCard
                   title="Titre du Livre 2"
                   author="Auteur 2"
-                  /*coverImage="https://example.com/book2-cover.jpg"*/
-              />  
+                  coverImage="https://d.wattpad.com/story_parts/836439491/images/15f14bc9f0e4e3b2605738069606.png"
+              /> 
+
               <BookCard
                   title="Titre du Livre 3"
                   author="Auteur 3"
-                  /*coverImage="https://example.com/book3-cover.jpg"*/
+                  coverImage="https://d.wattpad.com/story_parts/836439491/images/15f14bc9f0e4e3b2605738069606.png"
+              />
+              
+              <BookCard
+                  title="Titre du Livre 1"
+                  author="Auteur 1"
+                  coverImage="https://d.wattpad.com/story_parts/836439491/images/15f14bc9f0e4e3b2605738069606.png"
+              />
+
+              <BookCard
+                  title="Titre du Livre 2"
+                  author="Auteur 2"
+                  coverImage="https://d.wattpad.com/story_parts/836439491/images/15f14bc9f0e4e3b2605738069606.png"
+              />
+
+              <BookCard
+                  title="Titre du Livre 3"
+                  author="Auteur 3"
+                  coverImage="https://d.wattpad.com/story_parts/836439491/images/15f14bc9f0e4e3b2605738069606.png"
+              />
+
+              <BookCard
+                  title="Titre du Livre 1"
+                  author="Auteur 1"
+                  coverImage="https://d.wattpad.com/story_parts/836439491/images/15f14bc9f0e4e3b2605738069606.png"
+              />
+
+              <BookCard
+                  title="Titre du Livre 2"
+                  author="Auteur 2"
+                  coverImage="https://d.wattpad.com/story_parts/836439491/images/15f14bc9f0e4e3b2605738069606.png"
+              />
+              
+              <BookCard
+                  title="Titre du Livre 3"
+                  author="Auteur 3"
+                  coverImage="https://example.com/book3-cover.jpg"
               />  
           </div>
         </div>
