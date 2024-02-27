@@ -117,7 +117,11 @@ module.exports = {
       top: 'top',
       'top-4': 'center top 1rem',
     },
-    extend: {},
+    extend: {
+      gridAutoRows: {
+        '2fr': 'minmax(0, 2fr)',
+      },
+    },
   },
   plugins: [],
 }
