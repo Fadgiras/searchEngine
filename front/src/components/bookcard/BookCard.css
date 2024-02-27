@@ -1,33 +1,64 @@
 .card {
-    width: 100%;
-    min-width: 300px;
-    max-width: 900px;
-    display: flex;
-    align-items: flex-start; /* Aligner les éléments en haut */
-    margin-bottom: 20px;
-    padding: 10px;
-    border-radius: 5px;
-    background-color:rgb(48, 48, 124) ;
-    box-shadow: 0 6px 6px rgba(0, 0, 0, 1);
-  }
-  
-  .title {
-    font-size: 18px; /* Font plus grande */
-    font-weight: bold; /* Gras */
-    margin-left: 20px; 
-    margin-right: 20px;
-  }
-  
-  .author {
-    margin-top: 5px; 
-    font-size: 16px;
-    margin-left: 20px; 
-    margin-right: 20px;
-    color: #666; /* Couleur de texte plus claire */
-  }
-  
-  .image {
-    width: 100px;
-    height: 150px;
-    margin-left: auto; 
-  }
+  width: 200px;
+  height: 254px;
+  background: #3405a3;
+  background-image: linear-gradient(225deg, #9fa6b2 0%, #374151 100%);
+  border-radius: 15px;
+  box-shadow: 1px 5px 60px 0px #8A5959;
+
+  cursor: pointer;
+  margin-bottom: 10px;
+  padding: 10px;
+ }
+ 
+ .card .card-border-top {
+  width: 60%;
+  height: 3%;
+  background: #d2d6dc;
+  margin: auto;
+  border-radius: 0px 0px 15px 15px;
+ }
+ 
+ .card span {
+  font-weight: 600;
+  color: white;
+  text-align: center;
+  display: block;
+  padding-top: 10px;
+  font-size: 16px;
+ }
+ 
+ .card .job {
+  text-color: #d2d6dc;
+  font-weight: 400;
+  color: white;
+  display: block;
+  text-align: center;
+  padding-top: 3px;
+  font-size: 12px;
+ }
+ 
+ .card .img {
+  width: 70px;
+  height: 100px;
+  background: #d2d6dc;
+  border-radius: 15px;
+  margin: auto;
+  margin-top: 25px;
+ }
+ 
+ .card button {
+  padding: 8px 25px;
+  display: block;
+  margin: auto;
+  border-radius: 8px;
+  border: none;
+  margin-top: 10px;
+  background: #6b7280;
+  color: white;
+  font-weight: 600;
+ }
+ 
+ .card button:hover {
+  background: #252f3f;
+ }
