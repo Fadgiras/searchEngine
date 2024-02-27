@@ -55,7 +55,7 @@ function App() {
           links={headerProps.links}
         /> */}
 
-        <Disclosure as="nav" className="bg-gradient-to-r from-secondary-500 to-secondary-700">
+        <Disclosure as="nav" className="fixed top-0 w-full z-10 bg-gradient-to-r from-secondary-500 to-secondary-700">
           {({ open }) => (
             <>
               <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
@@ -75,7 +75,7 @@ function App() {
                   <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
                     <div className="flex flex-shrink-0 items-center">
                       <img
-                        className="h-8 w-auto"
+                        className="h-8 w-auto hidden sm:ml-6 sm:block"
                         src={logo}
                         alt="Biblio"
                       />
@@ -207,11 +207,13 @@ function App() {
         </Disclosure>
       </main>
       <br></br>
-      <Routes>
-        <Route path="/" element={<Acceuil key={"accueil-"} />} />
-        <Route path="/livres" element={<Livres key={"livres-"} />} />
-        <Route path="/recherches" element={<Recherches key={"recherches-"} />} />
-      </Routes>
+      <div className="m-20">
+        <Routes>
+          <Route path="/" element={<Acceuil key={"accueil-"} />} />
+          <Route path="/livres" element={<Livres key={"livres-"} />} />
+          <Route path="/recherches" element={<Recherches key={"recherches-"} />} />
+        </Routes>
+      </div>
     </>
   );
 }

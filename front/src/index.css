@@ -6,10 +6,11 @@ body {
     @apply bg-gradient-to-r from-violet-300 to-violet-200;
   }
 
-/* body {
+body {
     background-image: url('img/open-book-1428428_1920.jpg'), linear-gradient(to right, #6366F1, #7C3AED, #EC4899);
-    background-repeat: no-repeat;
+    min-height: 600px;
+    background-attachment: fixed;
     background-position: center;
+    background-repeat: no-repeat;
     background-size: cover;
-    position: relative;
-} */
+}
