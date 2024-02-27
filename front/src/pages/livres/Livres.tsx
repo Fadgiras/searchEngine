@@ -3,47 +3,61 @@ import React, {Dispatch, SetStateAction, useContext, useEffect, useState} from '
 import './Livres.css';
 import './../../styles/pages.css';
 // import Header from "../../components/Header";
-import axios from "axios";
+import BookCard from '../../components/bookcard/BookCard';
 
 
 const Livres = () => {
 
-  const Endpoint = "https://jsonplaceholder.typicode.com/users";
-  const [userData, setUserData] = useState([]);
-  const getUserData = async () => {
-    try {
-      const fetchData = await axios.get(Endpoint, {
-        headers: {
-          authorization: "Bearer JWT Token",
-        },
-      });
-      setUserData(fetchData.data);
-    } catch (error) {
-      console.log(error);
+  const [searchType, setSearchType] = useState<'id' | 'author' | 'text'>('id');
+  const [searchValue, setSearchValue] = useState('');
+
+  const handleSearch = () => {
+    if (searchType === 'id') {
+      // Recherche par id
+    } else if (searchType === 'author') {
+      // Recherche par auteur
+    } else {
+      // Recherche par texte
     }
   };
-  useEffect(() => {
-    window.addEventListener("load", getUserData);
-    console.log(userData);
-    return () => {
-      window.removeEventListener("load", getUserData);
-    };
-  }, [userData]);
 
+/*<div className='header'>
+            <h1 className='title'>Mon Moteur de Recherche</h1>
+            <SearchBar onSearch={handleSearch} />
+        </div>
+*/
   return (
     <>
-      <div className="container mt-5">
-        <h2 className="mb-4">React Read Dynamic List Values Example</h2>
-        {userData.map((item: { id: number, username: string }) => {
-          return (
-            <li className="card p-3 mb-2" key={item.id}>
-              <div className="card-body">
-                <p className="card-text">{item.username}</p>
-              </div>
-            </li>
-          );
-        })}
-      </div>
+        <div className='container'>
+          
+          <h1 className="bg-blue-500 text-white rounded">Recherche sur les Livres</h1>
+          
+          <input type="text" value={searchValue} onChange={(e) => setSearchValue(e.target.value)} className="border p-2 rounded flex-grow min-w-min max-w-screen-md" />
+          <button onClick={handleSearch} className="text-white p-2 rounded">Rechercher</button>
+          
+          <br></br>
+          <br></br>
+          <br></br>
+
+          <div className='grid grid-cols-none'>
+              <BookCard
+                  title="Titre du Livre 1"
+                  author="Auteur 1"
+                  /*coverImage="https://example.com/book1-cover.jpg"*/
+              />
+
+              <BookCard
+                  title="Titre du Livre 2"
+                  author="Auteur 2"
+                  /*coverImage="https://example.com/book2-cover.jpg"*/
+              />  
+              <BookCard
+                  title="Titre du Livre 3"
+                  author="Auteur 3"
+                  /*coverImage="https://example.com/book3-cover.jpg"*/
+              />  
+          </div>
+        </div>
     </>
   )
 }
