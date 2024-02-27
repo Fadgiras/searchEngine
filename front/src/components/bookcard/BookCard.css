@@ -1,0 +1,33 @@
+.card {
+    width: 100%;
+    min-width: 300px;
+    max-width: 900px;
+    display: flex;
+    align-items: flex-start; /* Aligner les éléments en haut */
+    margin-bottom: 20px;
+    padding: 10px;
+    border-radius: 5px;
+    background-color:rgb(48, 48, 124) ;
+    box-shadow: 0 6px 6px rgba(0, 0, 0, 1);
+  }
+  
+  .title {
+    font-size: 18px; /* Font plus grande */
+    font-weight: bold; /* Gras */
+    margin-left: 20px; 
+    margin-right: 20px;
+  }
+  
+  .author {
+    margin-top: 5px; 
+    font-size: 16px;
+    margin-left: 20px; 
+    margin-right: 20px;
+    color: #666; /* Couleur de texte plus claire */
+  }
+  
+  .image {
+    width: 100px;
+    height: 150px;
+    margin-left: auto; 
+  }
