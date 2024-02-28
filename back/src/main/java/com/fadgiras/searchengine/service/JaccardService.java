@@ -68,7 +68,7 @@ public class JaccardService {
         return intersection.size() / (double) union.size();
     }
 
-    public List<BookCardDTO> getSuggestedBooks(@RequestParam("id") int bookId) {
+    public List<BookCardDTO> getSuggestedBooks(int bookId, List<BookCardDTO> foundBooks) {
         Book book = bookRepository.findById(bookId).orElse(null);
         if (book == null) {
             return Collections.emptyList();
@@ -81,6 +81,9 @@ public class JaccardService {
         for (Object[] suggestedBookIdAndDistance : suggestedBookIdsAndDistances) {
             Long suggestedBookId = (Long) suggestedBookIdAndDistance[0];
             Book suggestedBook = bookRepository.findById(Math.toIntExact(suggestedBookId)).orElse(null);
+
+            if (foundBooks.stream().anyMatch(b -> b.getId().equals(suggestedBookId))) continue;
+
             if (suggestedBook != null && suggestedBooks.size() < limit) {
                 suggestedBooks.add(new BookCardDTO(suggestedBook));
             }else {
