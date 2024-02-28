@@ -250,7 +250,6 @@ public class MainController {
             try {
                 logger.trace("stemming book: {}", book.getTitle());
                 tokens = stem(book.getContent());
-                logger.trace("stemmed book: {}", book.getTitle());
                 logger.trace("tokens: {}", tokens.size());
             } catch (Exception e) {
                 e.printStackTrace();
