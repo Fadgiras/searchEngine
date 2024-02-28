@@ -239,6 +239,7 @@ public class MainController {
 
     @RequestMapping(value = "/indexer", produces = "application/json")
     public String indexer() {
+        indexRepository.deleteAll();
         bookRepository.findAll()
                 .parallelStream()
                 .forEach(book -> {
