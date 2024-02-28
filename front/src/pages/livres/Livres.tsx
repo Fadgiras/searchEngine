@@ -4,97 +4,75 @@ import './Livres.css';
 import './../../styles/pages.css';
 // import Header from "../../components/Header";
 import BookCard from '../../components/bookcard/BookCard';
+import SearchBar from '../../components/searchbar/SearchBar';
 
+
+interface Book {
+  id: number;
+  title: string;
+  author: string;
+  coverImage: string;
+}
 
 const Livres = () => {
 
+  const [books, setBooks] = useState<Book[]>([]);
   const [searchType, setSearchType] = useState<'id' | 'author' | 'text'>('id');
   const [searchValue, setSearchValue] = useState('');
+  const [error, setError] = useState(null);
+ 
+  const fetchData = async (url: string) => {
+    try {
+      const response = await fetch(url);
 
-  const handleSearch = () => {
-    if (searchType === 'id') {
-      // Recherche par id
-    } else if (searchType === 'author') {
-      // Recherche par auteur
-    } else {
-      // Recherche par texte
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setBooks(data);
+    } catch (error: any) {
+      setError(error.message);
+      console.error('Une erreur est survenue lors de la récupération des données.', error);
     }
   };
 
-/*<div className='header'>
-            <h1 className='title'>Mon Moteur de Recherche</h1>
-            <SearchBar onSearch={handleSearch} />
-        </div>
-*/
+  useEffect(() => {
+    // Initial fetch removed to only fetch data based on search
+  }, []);
+
+  
+
   return (
     <>
-        <div className='container'>
-          
-          <h1 className="bg-blue-500 text-white rounded">Recherche sur les Livres</h1>
-          
-          <input type="text" value={searchValue} onChange={(e) => setSearchValue(e.target.value)} className="border p-2 rounded flex-grow min-w-min max-w-screen-md" />
-          <button onClick={handleSearch} className="text-white p-2 rounded">Rechercher</button>
-          
-          <br></br>
-          <br></br>
-          <br></br>
+      <div className='container'>
+        <h1 className="bg-blue-500 text-white rounded">Recherche sur les Livres</h1>
+        <SearchBar onSearch={fetchData} />
+        {error && <p className="text-red-500">{error}</p>}
+        <br></br>
+        <br></br>
+        <br></br>
 
-          <div className='grid grid-cols-4 gap-4 grid-flow-row auto-rows-[minmax(0,_2fr)]'>
+        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4'>
+          {books.length > 0 ? (
+            books.map((book, index) => (
               <BookCard
-                  title="Titre du Livre 1"
-                  author="Auteur 1"
-                  coverImage="https://d.wattpad.com/story_parts/836439491/images/15f14bc9f0e4e3b2605738069606.png"
+                key={book.id}
+                id={book.id}
+                title={book.title}
+                author={book.author}
+                coverImage={book.coverImage}
+                onRead={() => {
+                  // Ajoutez le code à exécuter lorsque l'utilisateur clique sur "Lire"
+                }}
               />
-
-              <BookCard
-                  title="Titre du Livre 2"
-                  author="Auteur 2"
-                  coverImage="https://d.wattpad.com/story_parts/836439491/images/15f14bc9f0e4e3b2605738069606.png"
-              /> 
-
-              <BookCard
-                  title="Titre du Livre 3"
-                  author="Auteur 3"
-                  coverImage="https://d.wattpad.com/story_parts/836439491/images/15f14bc9f0e4e3b2605738069606.png"
-              />
-              
-              <BookCard
-                  title="Titre du Livre 1"
-                  author="Auteur 1"
-                  coverImage="https://d.wattpad.com/story_parts/836439491/images/15f14bc9f0e4e3b2605738069606.png"
-              />
-
-              <BookCard
-                  title="Titre du Livre 2"
-                  author="Auteur 2"
-                  coverImage="https://d.wattpad.com/story_parts/836439491/images/15f14bc9f0e4e3b2605738069606.png"
-              />
-
-              <BookCard
-                  title="Titre du Livre 3"
-                  author="Auteur 3"
-                  coverImage="https://d.wattpad.com/story_parts/836439491/images/15f14bc9f0e4e3b2605738069606.png"
-              />
-
-              <BookCard
-                  title="Titre du Livre 1"
-                  author="Auteur 1"
-                  coverImage="https://d.wattpad.com/story_parts/836439491/images/15f14bc9f0e4e3b2605738069606.png"
-              />
-
-              <BookCard
-                  title="Titre du Livre 2"
-                  author="Auteur 2"
-                  coverImage="https://d.wattpad.com/story_parts/836439491/images/15f14bc9f0e4e3b2605738069606.png"
-              />
-              
-              <BookCard
-                  title="Titre du Livre 3"
-                  author="Auteur 3"
-                  coverImage="https://example.com/book3-cover.jpg"
-              />  
-          </div>
+            ))
+            ) : (
+              <p className="text-white">Aucun livre correspondant à la recherche n'a été trouvé.</p>
+            )
+          }
         </div>
+      </div>
     </>
   )
 }
