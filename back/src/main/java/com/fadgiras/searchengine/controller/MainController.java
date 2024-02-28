@@ -262,7 +262,6 @@ public class MainController {
                 logger.trace("saving indexes");
                 indexRepository.saveAll(allIndexes);
                 logger.trace("saved indexes");
-
             } catch (Exception e) {
                 e.printStackTrace();
             }
