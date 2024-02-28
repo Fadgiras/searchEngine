@@ -8,8 +8,21 @@
 
   cursor: pointer;
   margin-bottom: 10px;
-  padding: 10px;
- }
+  padding: 5px;
+
+  transition: transform 0.3s ease-in-out;
+
+  }
+
+ .title, .author {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  }
+ .card:hover .title, .card:hover .author {
+  transform: scale(1.05);
+  width: auto;
+  }
  
  .card .card-border-top {
   width: 60%;
@@ -39,14 +52,22 @@
  }
  
  .card .img {
-  width: 70px;
-  height: 100px;
+  width: auto;
+  height: auto;
   background: #d2d6dc;
   border-radius: 15px;
   margin: auto;
   margin-top: 25px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
  }
  
+ .card .img .image {
+  max-width: 70px;
+  max-height: 100px;
+  }
+
  .card button {
   padding: 8px 25px;
   display: block;
@@ -62,3 +83,4 @@
  .card button:hover {
   background: #252f3f;
  }
+ 
