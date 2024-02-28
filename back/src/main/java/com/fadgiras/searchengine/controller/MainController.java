@@ -17,6 +17,7 @@ import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.search.similarities.ClassicSimilarity;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -36,6 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @RestController
+@CrossOrigin(origins = {"http://localhost:3000/", "http://127.0.0.1:3000"})
 public class MainController {
 
     @Autowired
@@ -325,13 +327,13 @@ public class MainController {
         return "ok";
     }
 
-    @RequestMapping(value = "/init", produces = "application/json")
-    public String init() throws Exception {
-        refreshBooks();
-        updateNumberOfTokens();
-        indexer();
-        return "ok";
-    }
+//    @RequestMapping(value = "/init", produces = "application/json")
+//    public String init() throws Exception {
+//        refreshBooks();
+//        updateNumberOfTokens();
+//        indexer();
+//        return "ok";
+//    }
 
     @RequestMapping(value = "/rindexes", produces = "application/json")
     public List<RIndex> rindexes() {
