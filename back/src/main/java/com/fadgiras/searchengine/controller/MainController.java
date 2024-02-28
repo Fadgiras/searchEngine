@@ -1,12 +1,14 @@
 package com.fadgiras.searchengine.controller;
 
 import com.fadgiras.searchengine.dto.BookCardDTO;
+import com.fadgiras.searchengine.dto.ResultDTO;
 import com.fadgiras.searchengine.model.Book;
 import com.fadgiras.searchengine.model.Index;
 import com.fadgiras.searchengine.model.RIndex;
 import com.fadgiras.searchengine.repository.BookRepository;
 import com.fadgiras.searchengine.repository.IndexRepository;
 import com.fadgiras.searchengine.repository.RIndexRepository;
+import com.fadgiras.searchengine.service.JaccardService;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.CharArraySet;
 import org.apache.lucene.analysis.StopFilter;
@@ -48,6 +50,9 @@ public class MainController {
 
     @Autowired
     IndexRepository indexRepository;
+
+    @Autowired
+    JaccardService jaccardService;
 
     private static final Logger logger = LoggerFactory.getLogger(MainController.class);
 
@@ -100,14 +105,15 @@ public class MainController {
     }
 
     @RequestMapping(value = "/search", produces = "application/json")
-    public List<BookCardDTO> search(@RequestParam(value = "q", required = false) String query, @RequestParam(value = "r", required = false, defaultValue = "false") boolean r) throws UnsupportedEncodingException {
+    public ResultDTO search(@RequestParam(value = "q", required = false) String query, @RequestParam(value = "r", required = false, defaultValue = "false") boolean r) throws UnsupportedEncodingException {
         //TODO make a fail safe for stop words stemming
         if (query == null) {
-            return new ArrayList<>();
+            return new ResultDTO();
         }else {
             List<BookCardDTO> foundBooks = new ArrayList<>();
             List<Book> bookBuffer = new ArrayList<>();
             Map<BookCardDTO, Double> scores = new HashMap<>();
+            List<BookCardDTO> bookToSuggest = new ArrayList<>();
             if (!r) {
                 Double boost = DEFAULT_BOOST;
                 for (String s : stem(query)) {
@@ -129,7 +135,8 @@ public class MainController {
                         boost -= 0.2;
                     }
                 }
-            }else {
+            }
+            else {
                 query = URLDecoder.decode(query, "UTF-8");
                 //fecth all words that match the regex
                 Pattern pattern = Pattern.compile(query);
@@ -165,7 +172,17 @@ public class MainController {
             scores.entrySet().stream()
                     .sorted((k1, k2) -> -k1.getValue().compareTo(k2.getValue()))
                     .forEach(k -> foundBooks.add(k.getKey()));
-            return foundBooks;
+
+            bookToSuggest = foundBooks.stream().limit(3).toList();
+            List<BookCardDTO> suggestedBooks = new ArrayList<>();
+            for (BookCardDTO book : bookToSuggest) {
+                List<BookCardDTO> suggested = jaccardService.getSuggestedBooks(Math.toIntExact(book.getId()));
+                suggestedBooks.addAll(suggested);
+            }
+
+            System.err.println(suggestedBooks);
+
+            return new ResultDTO(foundBooks, suggestedBooks);
         }
     }
 
@@ -379,9 +396,8 @@ public class MainController {
         //N is the number of documents in the data set.
         //n is the number of documents that contain the term t among the data set.
         int N = bookRepository.findAll().size();
-//        System.err.println("N: " + N);
         int n = indexRepository.findBooksByWord(word).size();
-//        System.err.println("n: " + n);
+        if (n == 0) return 0.0;
 
         return Math.log(N / n);
     }
@@ -395,5 +411,10 @@ public class MainController {
     @RequestMapping(value = "/getBook", produces = "application/json")
     public Book getBook(@RequestParam(value = "id") int id) {
         return bookRepository.getBookById(id);
+    }
+
+    @RequestMapping(value = "/jaccard", produces = "application/json")
+    public String jaccard() {
+        return jaccardService.calculateJaccardDistances();
     }
 }

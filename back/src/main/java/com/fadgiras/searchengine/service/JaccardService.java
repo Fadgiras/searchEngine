@@ -1,4 +1,4 @@
-package com.fadgiras.searchengine.controller;
+package com.fadgiras.searchengine.service;
 
 import com.fadgiras.searchengine.dto.BookCardDTO;
 import com.fadgiras.searchengine.model.Book;
@@ -6,15 +6,14 @@ import com.fadgiras.searchengine.model.JaccardBook;
 import com.fadgiras.searchengine.repository.BookRepository;
 import com.fadgiras.searchengine.repository.JaccardBookRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-@RestController
-public class JaccardController {
+@Service
+public class JaccardService {
 
     @Autowired
     BookRepository bookRepository;
@@ -22,7 +21,6 @@ public class JaccardController {
     @Autowired
     JaccardBookRepository jaccardBookRepository;
 
-    @RequestMapping("/jaccard")
     public String calculateJaccardDistances() {
         jaccardBookRepository.deleteAll(); // Supprime toutes les distances de Jaccard de la base de données
         List<Book> books = bookRepository.findAll(); // Récupère tous les livres de la base de données
@@ -70,7 +68,6 @@ public class JaccardController {
         return intersection.size() / (double) union.size();
     }
 
-    @RequestMapping("/suggestedBooks")
     public List<BookCardDTO> getSuggestedBooks(@RequestParam("id") int bookId) {
         Book book = bookRepository.findById(bookId).orElse(null);
         if (book == null) {
