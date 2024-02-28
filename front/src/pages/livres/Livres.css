@@ -1,0 +1,16 @@
+/* Ajoutez ceci à votre fichier CSS */
+
+.book-card {
+    /* Ajoutez une transition à l'opacité et à la transformation */
+    transition: opacity 0.3s, transform 0.3s;
+  
+    /* Définissez l'opacité initiale et la transformation */
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  
+  .book-card.visible {
+    /* Définissez l'opacité et la transformation finales */
+    opacity: 1;
+    transform: translateY(0);
+  }
