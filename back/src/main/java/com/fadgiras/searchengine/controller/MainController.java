@@ -255,6 +255,7 @@ public class MainController {
                 e.printStackTrace();
             }
             logger.trace("processing words");
+
             for (String s : tokens) {
                 Index index = new Index(book, s, 1);
 
@@ -268,7 +269,7 @@ public class MainController {
             }
             logger.trace("processed words");
             logger.trace("saving indexes");
-            indexRepository.saveAll(allIndexes.stream().toList());
+            indexRepository.saveAll(allIndexes);
             logger.trace("saved indexes");
         }
 
