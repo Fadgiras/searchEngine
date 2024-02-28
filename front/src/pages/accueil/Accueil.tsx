@@ -5,7 +5,7 @@ import './../../styles/pages.css';
 // import Header from "../../components/Header";
 import peakpx from '../../img/peakpx.jpg';
 import TextField from "@mui/material/TextField";
-import List from "./../../components/List";
+import List from "../../components/Book";
 import Livres from "./../livres/Livres";
 import 'bootstrap/dist/css/bootstrap.min.css'
 

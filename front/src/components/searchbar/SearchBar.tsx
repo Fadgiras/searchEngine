@@ -1,29 +1,28 @@
 import React, { useState } from 'react';
-import "./SearchBar.css"; 
 
-export default SearchBar ;
-
-function SearchBar({ onSearch }: { onSearch: (query: string) => void }) {
-
-    const [query, setQuery] = useState('');
-
-    const handleChange = (event: { target: { value: React.SetStateAction<string>; }; }) => {
-        setQuery(event.target.value);
-    };
-
-    const handleClick = () => {
-        onSearch(query);
-    }
-
-    return (
-        <div className='search-bar'>
-            <input 
-                type="text" 
-                value={query}
-                onChange={handleChange}
-                className='input' />
-
-            <button className="button" onClick={handleClick}>Search</button>
-        </div>
-    )
+interface SearchBarProps {
+  onSearch: (query: string) => void;
 }
+
+const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
+  const [query, setQuery] = useState('');
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSearch(query);
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input
+        type="text"
+        placeholder="Rechercher un livre"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+      />
+      <button type="submit">Rechercher</button>
+    </form>
+  );
+};
+
+export default SearchBar;

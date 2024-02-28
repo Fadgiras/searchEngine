@@ -7,7 +7,7 @@ interface Item {
     text: string;
 }
 
-function List(props: any) {
+function Book(props: any) {
     //create a new array by filtering the original array
     const filteredData = data.filter((el) => {
         //if no input the return the original
@@ -28,4 +28,4 @@ function List(props: any) {
     )
 }
 
-export default List;
+export default Book;

@@ -4,11 +4,11 @@ import './Livres.css';
 import './../../styles/pages.css';
 // import Header from "../../components/Header";
 import BookCard from '../../components/bookcard/BookCard';
+import BooksList from '../../components/bookList/BookList';
 
 
 const Livres = () => {
 
-  const [searchType, setSearchType] = useState<'id' | 'author' | 'text'>('id');
   const [searchValue, setSearchValue] = useState('');
 
   const handleSearch = () => {
