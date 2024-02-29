@@ -1,18 +1,19 @@
 .content {
     display: flex;
     flex-direction: column;
-    width: auto;
     padding: 2% 2%;
     background: #dde1e7;
     border-radius: 10px;
     box-shadow: -3px -3px 7px #ffffff73,
                  2px 2px 5px rgba(94,104,121,0.288);
-    
+    justify-content: center;
+    align-items: center;
+    text-align: center;
   }
 
   .label {
     flex: 1;
-    /* le reste de votre CSS pour .label */
+    white-space: pre-wrap; /* Ajoutez cette ligne */
   }
   
   .content .text {
@@ -27,6 +28,8 @@
     width: 100%;
     display: flex;
     position: relative;
+    justify-content: center;
+    align-items: center;
   }
   
   .field:nth-child(2) {
@@ -53,7 +56,6 @@
   }
   
   .field .span {
-    position: absolute;
     color: #595959;
     width: 50px;
     line-height: 55px;

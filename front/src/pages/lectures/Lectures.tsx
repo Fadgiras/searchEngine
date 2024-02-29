@@ -78,10 +78,10 @@ function Lectures({ onSearch }: { onSearch: (query: string) => Promise<void> }) 
             {book.title}
           </div>
           <form action="#">
-            <div className="field">
+            <div className="field grid grid-cols-2 gap-4">
               <span className="span">
                 <svg 
-                  className="" 
+                  className=""
                   xmlSpace="preserve" 
                   viewBox="0 0 512 512" 
                   y="0" 
@@ -109,7 +109,9 @@ function Lectures({ onSearch }: { onSearch: (query: string) => Promise<void> }) 
         </div>
         <div className="content m-20" style={{ display: 'flex', flexDirection: 'column' }}>
           <div className="field" style={{ flex: 1 }}>
-            {book.content}
+            <pre>
+              {book.content.replace(/\\r\\n/g, '<br/>').replace(/\\n/g, '<br/>').replace(/\\r/g, '<br/>')}
+            </pre>
           </div>
         </div>
       <ScrollToTopButton />
