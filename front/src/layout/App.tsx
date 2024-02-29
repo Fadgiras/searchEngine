@@ -24,7 +24,7 @@ function App() {
   const location = useLocation();
   const navigation = [
     { name: 'Menu', href: '#/', current: true  },
-    { name: 'Recherches', href: '#/recherches', current: false  },
+    { name: 'RegEx', href: '#/recherches', current: false  },
     { name: 'Livres', href: '#/livres', current: false  },
     { name: 'Lectures', href: '#/lectures', current: false  },
   ];

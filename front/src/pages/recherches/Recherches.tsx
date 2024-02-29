@@ -19,16 +19,31 @@ interface Book {
 const Recherches = () => {
 
   const [books, setBooks, ] = useState<Book[]>([]);
-  const [suggestedBooks, setSuggestedBooks] = useState<Book[]>([]);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [error, setError] = useState(null);
   const booksPerPage = 50; // Nombre de livres par page
   const navigate = useNavigate();
 
+  function customRegex(input : string) {
+    // Utilise encodeURIComponent pour encoder la majorité des caractères spéciaux
+    let encoded = encodeURIComponent(input);
+  
+    // Encode les caractères qui ne sont pas pris en charge par encodeURIComponent
+    encoded = encoded.replace(/!/g, '%21')
+                     .replace(/'/g, '%27')
+                     .replace(/\(/g, '%28')
+                     .replace(/\)/g, '%29')
+                     .replace(/\*/g, '%2A')
+                     .replace(/~/g, '%7E')
+                     .replace(/%20/g, '+'); // Remplace les espaces par des +
+  
+    return encoded;
+  }
+
   const fetchData = async (query: string) => {
     try {
-      const response = await fetch(`http://localhost:8080/search?q=${query}`);
+      const response = await fetch(`http://localhost:8080/search?q=${customRegex(query)}&r=true`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -39,12 +54,6 @@ const Recherches = () => {
         setBooks(data.books);
       } else {
         setBooks([]);
-      }
-  
-      if (Array.isArray(data.suggestedBooks)) {
-        setSuggestedBooks(data.suggestedBooks);
-      } else {
-        setSuggestedBooks([]);
       }
   
     } catch (error: any) {
@@ -94,31 +103,6 @@ const Recherches = () => {
                 }}
               />
             ))
-          }
-        </div>
-
-        <br></br>
-        <br></br>
-
-        <h1 className="bg-blue-500 text-white rounded">Livres suggérés</h1>
-        <br></br>
-        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4'>
-          {suggestedBooks.length > 0 ? (
-            suggestedBooks.map((book, index) => (
-              <BookCard
-                key={book.id}
-                id={book.id}
-                title={book.title}
-                author={book.author}
-                coverImage={book.coverImage}
-                onRead={() => {
-                  navigate(`/lecture/${book.id}`);
-                }}
-              />
-            ))
-            ) : (
-              <p className="text-white">Aucun livre suggéré n'a été trouvé.</p>
-            )
           }
         </div>
 
