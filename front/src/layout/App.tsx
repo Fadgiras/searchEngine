@@ -7,6 +7,7 @@ import './App.css';
 import Acceuil from "./../pages/accueil/Accueil";
 import Livres from "./../pages/livres/Livres";
 import Recherches from "./../pages/recherches/Recherches";
+import Lectures from "../pages/lectures/Lectures";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import React, {Fragment, useEffect, useState} from "react";
@@ -25,13 +26,13 @@ function App() {
     { name: 'Menu', href: '#/', current: true  },
     { name: 'Recherches', href: '#/recherches', current: false  },
     { name: 'Livres', href: '#/livres', current: false  },
-    { name: 'Auteurs', href: '#/auteurs', current: false  },
+    { name: 'Lectures', href: '#/lectures', current: false  },
   ];
 
   return (
     <>
-      <main className="App">
-        <Disclosure as="nav" className="fixed top-0 w-full z-10 bg-gradient-to-r from-Slate-500 to-Slate-700">
+      <main className="App " style={{ zIndex: 9999 }}>
+        <Disclosure as="nav" className="fixed top-0 w-full z-10 bg-gradient-to-r from-Slate-200 to-Slate-400">
           {({ open }) => (
             <>
               <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
@@ -63,7 +64,7 @@ function App() {
                             key={item.name}
                             href={item.href}
                             className={classNames(
-                              item.current ? 'bg-Slate-200 text-black' : 'text-Slate-300 hover:bg-Slate-600 hover:text-tahiti',
+                              item.current ? 'bg-Slate-300 text-black' : 'text-Slate-700 hover:bg-Slate-600 hover:text-tahiti',
                               'rounded-md px-3 py-2 text-sm font-medium'
                             )}
                             aria-current={item.current ? 'page' : undefined}
@@ -182,12 +183,12 @@ function App() {
           )}
         </Disclosure>
       </main>
-      <br></br>
-      <div className="m-20">
+      <div className="">
         <Routes>
           <Route path="/" element={<Acceuil key={"accueil-"} />} />
           <Route path="/livres" element={<Livres key={"livres-"} />} />
           <Route path="/recherches" element={<Recherches key={"recherches-"} />} />
+          <Route path="/lecture/:id" element={<Lectures key={"lectures-"} />}  />
         </Routes>
       </div>
     </>
