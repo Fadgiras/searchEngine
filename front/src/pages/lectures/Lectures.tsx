@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import ScrollToTopButton from "../../components/ScrollToTopButton/ScrollToTopButton";
+import './Lectures.css';
 
 interface Book {
   id: number;
@@ -71,12 +72,47 @@ function Lectures({ onSearch }: { onSearch: (query: string) => Promise<void> }) 
             </div>
           </div>
         </div>
-        <div className="m-20">
-          <h1 className="text-3xl font-bold mb-4">{book.title}</h1>
-          <h2 className="text-xl mb-2">{book.author}</h2>
-          <p className="text-base text-justify">{book.content}</p>
+
+        <div className="content m-20" style={{ display: 'flex', flexDirection: 'column' }}>
+          <div className="text" style={{ flex: 1 }}>
+            {book.title}
+          </div>
+          <form action="#">
+            <div className="field">
+              <span className="span">
+                <svg 
+                  className="" 
+                  xmlSpace="preserve" 
+                  viewBox="0 0 512 512" 
+                  y="0" 
+                  x="0" 
+                  height="20" 
+                  width="50" 
+                  xmlnsXlink="http://www.w3.org/1999/xlink" 
+                  version="1.1" 
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <g>
+                    <path 
+                      className="" 
+                      data-original="#000000" 
+                      fill="#595959" 
+                      d="M256 0c-74.439 0-135 60.561-135 135s60.561 135 135 135 135-60.561 135-135S330.439 0 256 0zM423.966 358.195C387.006 320.667 338.009 300 286 300h-60c-52.008 0-101.006 20.667-137.966 58.195C51.255 395.539 31 444.833 31 497c0 8.284 6.716 15 15 15h420c8.284 0 15-6.716 15-15 0-52.167-20.255-101.461-57.034-138.805z"
+                    >
+                    </path>
+                  </g>
+                </svg>
+              </span>
+              <label className="label" aria-label="Autheur">Auteur : {book.author}</label>
+            </div>
+          </form>
         </div>
-        <ScrollToTopButton />
+        <div className="content m-20" style={{ display: 'flex', flexDirection: 'column' }}>
+          <div className="field" style={{ flex: 1 }}>
+            {book.content}
+          </div>
+        </div>
+      <ScrollToTopButton />
     </>
   );
 };
