@@ -1,129 +1,173 @@
-import React, {useEffect, useState} from 'react';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import React, {Dispatch, SetStateAction, useContext, useEffect, useState} from 'react';
+import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/20/solid'
 import './Recherches.css';
 import './../../styles/pages.css';
 // import Header from "../../components/Header";
-import axios from "axios";
+import BookCard from '../../components/bookcard/BookCard';
+import SearchBar from '../../components/searchbar/SearchBar';
+import { useNavigate } from "react-router-dom";
 
-//--------------Barre de recherche----------------//
-const Recherches: React.FC = () => {
-  const [searchType, setSearchType] = useState<'id' | 'author' | 'text'>('id');
-  const [searchValue, setSearchValue] = useState('');
 
-  const handleSearch = () => {
-    if (searchType === 'id') {
-      // Recherche par id
-    } else if (searchType === 'author') {
-      // Recherche par auteur
-    } else {
-      // Recherche par texte
-    }
-  };
+interface Book {
+  id: number;
+  title: string;
+  author: string;
+  coverImage: string;
+}
 
-//--------------recherche JSON----------------//
-  const Endpoint = "https://jsonplaceholder.typicode.com/users";
-  const [userData, setUserData] = useState([]);
-  const getUserData = async () => {
+const Recherches = () => {
+
+  const [books, setBooks, ] = useState<Book[]>([]);
+  const [suggestedBooks, setSuggestedBooks] = useState<Book[]>([]);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [error, setError] = useState(null);
+  const booksPerPage = 50; // Nombre de livres par page
+  const navigate = useNavigate();
+
+  const fetchData = async (query: string) => {
     try {
-      const fetchData = await axios.get(Endpoint, {
-        headers: {
-          authorization: "Bearer JWT Token",
-        },
-      });
-      setUserData(fetchData.data);
-    } catch (error) {
-      console.log(error);
+      const response = await fetch(`http://localhost:8080/search?q=${query}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      console.log(response)
+  
+      const data = await response.json();
+      if (Array.isArray(data.books)) {
+        setBooks(data.books);
+      } else {
+        setBooks([]);
+      }
+  
+      if (Array.isArray(data.suggestedBooks)) {
+        setSuggestedBooks(data.suggestedBooks);
+      } else {
+        setSuggestedBooks([]);
+      }
+  
+    } catch (error: any) {
+      setError(error.message);
+      console.error('Une erreur est survenue lors de la récupération des données.', error);
     }
   };
-  useEffect(() => {
-    window.addEventListener("load", getUserData);
-    console.log(userData);
-    return () => {
-      window.removeEventListener("load", getUserData);
-    };
-  }, [userData]);
+
+
+  // Calculer l'index de début et de fin des livres à afficher
+  const startIndex = (currentPage - 1) * booksPerPage;
+  const endIndex = Math.min(startIndex + booksPerPage, books.length);
+
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+  };
+
+  // Calculer le nombre total de pages
+  const totalPages = Math.ceil(books.length / booksPerPage);
+
+  // Calculer les pages à afficher
+  const pagesToShow = 5; // Nombre de pages à afficher à la fois
+  const startPage = Math.max(1, currentPage - Math.floor(pagesToShow / 2));
+  const endPage = Math.min(totalPages, startPage + pagesToShow - 1);
 
   return (
     <>
+      <div className='container m-20'>
+        <h1 className="bg-blue-500 text-white rounded">Recherche par RegEX</h1>
+        <SearchBar onSearch={fetchData} />
+        {error && <p className="text-red-500">{error}</p>}
+        <br></br>
+        <br></br>
+        <br></br>
 
-      {/* --------------Barre de recherche---------------- */}
-      <div className="flex items-center space-x-2 m-20">
-        <select value={searchType} onChange={(e) => setSearchType(e.target.value as 'id' | 'author' | 'text')} className="border p-2 rounded">
-          <option value="id">ID</option>
-          <option value="author">Auteur</option>
-          <option value="text">Texte</option>
-        </select>
-        <input type="text" value={searchValue} onChange={(e) => setSearchValue(e.target.value)} className="border p-2 rounded flex-grow" />
-        <button onClick={handleSearch} className="bg-blue-500 text-white p-2 rounded">Rechercher</button>
-      </div>
+        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4'>
+          {
+            books.slice(startIndex, endIndex).map((book) => (
+              <BookCard
+                key={book.id}
+                id={book.id}
+                title={book.title}
+                author={book.author}
+                coverImage={book.coverImage}
+                onRead={() => {
+                  navigate(`/lecture/${book.id}`);
+                }}
+              />
+            ))
+          }
+        </div>
 
-      {/* --------------recherche JSON---------------- */}
-      <div className="container mt-5">
-        <h2 className="mb-4">React Read Dynamic List Values Example</h2>
-        {userData.map((item: { id: number, username: string }) => {
-          return (
-            <li className="card p-3 mb-2" key={item.id}>
-              <div className="card-body">
-                <p className="card-text">{item.username}</p>
-              </div>
-            </li>
-          );
-        })}
-      </div>
+        <br></br>
+        <br></br>
 
-      {/* <div className="tss-1l4p3k-root MuiBox-root mui-0" style={{ "--banner-height": "450px" } as React.CSSProperties}>
-        <h1 className="MuiTypography-root MuiTypography-h1 tss-1hkdiuq-root-header mui-16lxm23">Cherchez des ouvrages dans les bibliothèques près de chez vous</h1>
-        <div className="MuiBox-root mui-103ku3o">
-          <div className="MuiBox-root mui-gmuwbf">
-            <form className="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 tss-w5pr3k-paper mui-hsycap" role="search">
-              <div data-testid="hero-search-box-select" className="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary tss-kyr3pl-select-searchBox mui-1elnojk">
-                <div tabIndex={0} role="combobox" aria-controls=":r1p:" aria-expanded="false" aria-haspopup="listbox" className="MuiSelect-select MuiSelect-outlined MuiInputBase-input MuiOutlinedInput-input mui-1yhuea8">
-                  Ouvrages
-                </div>
-                <input aria-invalid="false" aria-hidden="true" tabIndex={-1} className="MuiSelect-nativeInput mui-1k3x8v3" data-testid="hero-search-box-select-input" value="items">
-                  <svg className="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium MuiSelect-icon MuiSelect-iconOutlined mui-1yza03u" focusable="false" aria-hidden="true" viewBox="0 0 24 24" data-testid="ArrowDropDownIcon">
-                    <path d="M7 10l5 5 5-5z"></path>
-                  </svg>
-                  <fieldset aria-hidden="true" className="MuiOutlinedInput-notchedOutline mui-igs3ac">
-                    <legend className="mui-ihdtdm">
-                      <span className="notranslate">
-                      ​</span>
-                    </legend>
-                  </fieldset>
-                </input>
-                <div className="MuiAutocomplete-root MuiAutocomplete-fullWidth tss-1qcoye3-root-inputBase-input mui-vtpdau">
-                  <div className="MuiFormControl-root MuiFormControl-fullWidth MuiTextField-root mui-feqhe6">
-                    <div className="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-fullWidth MuiInputBase-formControl MuiAutocomplete-inputRoot mui-jfcr8b">
-                      <input aria-invalid="false" autoComplete="off" id="home-page-search-box" placeholder="Cherchez des livres, articles et plus" type="text" data-testid="home-page-search-bar" aria-label="Entrez l'énoncé de recherche" className="MuiInputBase-input MuiOutlinedInput-input MuiAutocomplete-input MuiAutocomplete-inputFocused mui-dhw3sk" aria-autocomplete="both" aria-expanded="false" autoCapitalize="none" spellCheck="false" role="combobox" value="">
-                        <fieldset aria-hidden="true" className="MuiOutlinedInput-notchedOutline mui-igs3ac">
-                          <legend className="mui-ihdtdm">
-                            <span className="notranslate">​</span>
-                          </legend>
-                        </fieldset>
-                      </input>
-                    </div>
-                  </div>
-                </div>
-                <button className="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeMedium MuiButton-containedSizeMedium tss-f4wmgr-button mui-1acs0kp" tabIndex={0} type="submit" aria-label="Chercher" data-testid="search-button">
-                  <svg className="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium mui-14yq2cq" focusable="false" aria-hidden="true" viewBox="0 0 24 24" data-testid="MagnifyIcon">
-                    <path d="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z"></path>
-                  </svg>
-                  <span className="MuiTouchRipple-root mui-w0pj6f"></span>
+        <h1 className="bg-blue-500 text-white rounded">Livres suggérés</h1>
+        <br></br>
+        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4'>
+          {suggestedBooks.length > 0 ? (
+            suggestedBooks.map((book, index) => (
+              <BookCard
+                key={book.id}
+                id={book.id}
+                title={book.title}
+                author={book.author}
+                coverImage={book.coverImage}
+                onRead={() => {
+                  navigate(`/lecture/${book.id}`);
+                }}
+              />
+            ))
+            ) : (
+              <p className="text-white">Aucun livre suggéré n'a été trouvé.</p>
+            )
+          }
+        </div>
+
+        <br></br>
+
+        {/* Pagination */}
+        <div className="fixed bottom-0 left-0 right-0 flex flex-col items-center justify-between sm:flex-row border-t border-Slate-500 bg-Slate-200 px-4 py-3 sm:px-6">
+          <div className="flex flex-col items-center sm:flex-row sm:items-center sm:justify-between w-full">
+            <div className="mb-2 sm:mb-0">
+              <p className="text-sm text-Slate-700">
+                Affichage de <span className="font-medium">{(currentPage - 1) * booksPerPage + 1}</span> à <span className="font-medium">{Math.min(currentPage * booksPerPage, books.length)}</span> sur{' '}
+                <span className="font-medium">{books.length}</span> résultats
+              </p>
+            </div>
+            <div>
+              <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
+                  disabled={currentPage === 1}
+                >
+                  <span className="sr-only">Précédent</span>
+                  <ChevronLeftIcon className="h-5 w-5" aria-hidden="true" />
                 </button>
-              </div>
-            </form>
-            <div className="MuiBox-root mui-1iuj5ih">
-              <button className="MuiButtonBase-root MuiIconButton-root MuiIconButton-colorInherit MuiIconButton-sizeLarge tss-cg9iy4-iconButton mui-6qpy1h" tabIndex={parseInt("0")} type="button" data-testid="advanced-search-button" aria-label="Recherche avancée">
-                <svg className="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium mui-14yq2cq" focusable="false" aria-hidden="true" viewBox="0 0 24 24" data-testid="TuneVerticalVariantIcon">
-                  <path d="M8 12.14V2H6V12.14C4.28 12.59 3 14.14 3 16S4.28 19.41 6 19.86V22H8V19.86C9.72 19.41 11 17.86 11 16S9.72 12.59 8 12.14M7 14C8.1 14 9 14.9 9 16S8.1 18 7 18C5.9 18 5 17.1 5 16S5.9 14 7 14M18 2H16V4.14C14.28 4.59 13 6.14 13 8S14.28 11.41 16 11.86V22H18V11.86C19.72 11.41 21 9.86 21 8S19.72 4.59 18 4.14V2M17 6C18.1 6 19 6.9 19 8S18.1 10 17 10C15.9 10 15 9.1 15 8S15.9 6 17 6Z"></path>
-                </svg>
-                <span className="MuiTouchRipple-root mui-w0pj6f"></span>
-              </button>
+                {[...Array(endPage - startPage + 1)].map((_, i) => (
+                  <button 
+                    key={i} 
+                    onClick={() => handlePageChange(startPage + i)}
+                    className={`relative inline-flex items-center px-2 py-2 text-sm font-semibold ${currentPage === startPage + i ? 'bg-indigo-600 text-Rose-600' : 'text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50'} focus:z-20 focus:outline-offset-0`}
+                  >
+                    {startPage + i}
+                  </button>
+                ))}
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
+                  disabled={currentPage === totalPages}
+                >
+                  <span className="sr-only">Suivant</span>
+                  <ChevronRightIcon className="h-5 w-5" aria-hidden="true" />
+                </button>
+              </nav>
             </div>
           </div>
         </div>
-      </div> */}
+
+      </div>
     </>
-  );
-};
+  )
+}
 
 export default Recherches;
