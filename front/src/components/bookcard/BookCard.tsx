@@ -1,8 +1,8 @@
 // import React from 'react';
 import React from 'react';
-import image1 from './../../img/bookaleatoire/frappe.gif';
-import image2 from './../../img/bookaleatoire/oh.png';
-import image3 from './../../img/bookaleatoire/poop.png';
+import image1 from './../../img/livre-de-magie.png';
+import image2 from './../../img/peakpx.jpg';
+import image3 from './../../img/journee-mondiale-du-livre.png';
 import './BookCard.css';
 
 interface BookCardProps {

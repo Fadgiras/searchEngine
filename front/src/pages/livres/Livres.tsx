@@ -32,6 +32,7 @@ const Livres = () => {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
+      console.log(response)
   
       const data = await response.json();
       if (Array.isArray(data.books)) {

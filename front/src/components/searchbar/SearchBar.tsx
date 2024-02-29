@@ -12,9 +12,8 @@ function SearchBar({ onSearch }: { onSearch: (query: string) => Promise<void> })
 
     const handleSubmit = async (event: { preventDefault: () => void; }) => {
         event.preventDefault();
-        const url = `http://127.0.0.1:8080/search?q=${query}`;
         setIsLoading(true);
-        await onSearch(url);
+        await onSearch(query);
         setIsLoading(false);
     }
 
