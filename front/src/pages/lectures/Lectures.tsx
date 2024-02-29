@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import ScrollToTopButton from "../../components/ScrollToTopButton/ScrollToTopButton";
 
 interface Book {
   id: number;
@@ -75,6 +76,7 @@ function Lectures({ onSearch }: { onSearch: (query: string) => Promise<void> }) 
           <h2 className="text-xl mb-2">{book.author}</h2>
           <p className="text-base text-justify">{book.content}</p>
         </div>
+        <ScrollToTopButton />
     </>
   );
 };
