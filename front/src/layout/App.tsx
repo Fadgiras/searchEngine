@@ -188,7 +188,9 @@ function App() {
           <Route path="/" element={<Acceuil key={"accueil-"} />} />
           <Route path="/livres" element={<Livres key={"livres-"} />} />
           <Route path="/recherches" element={<Recherches key={"recherches-"} />} />
-          <Route path="/lecture/:id" element={<Lectures key={"lectures-"} />}  />
+          <Route path="/lecture/:id" element={<Lectures key={"lectures-"} onSearch={function (query: string): Promise<void> {
+            throw new Error('Function not implemented.');
+          } } />}  />
         </Routes>
       </div>
     </>
