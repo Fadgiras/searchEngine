@@ -7,6 +7,7 @@ import './../../styles/pages.css';
 import BookCard from '../../components/bookcard/BookCard';
 import SearchBar from '../../components/searchbar/SearchBar';
 import { useNavigate } from "react-router-dom";
+import ScrollToTopButton from "../../components/ScrollToTopButton/ScrollToTopButton";
 
 
 interface Book {
@@ -121,6 +122,8 @@ const Livres = () => {
             )
           }
         </div>
+
+        <ScrollToTopButton />
 
         <br></br>
 

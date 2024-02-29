@@ -6,6 +6,7 @@ import Livres from "./../livres/Livres";
 import 'bootstrap/dist/css/bootstrap.min.css'
 import image1 from './../../img/woman-6784555_1920.jpg';
 import image2 from './../../img/tu-delft-1723434_1920.jpg';
+import ScrollToTopButton from "../../components/ScrollToTopButton/ScrollToTopButton";
 
 const Accueil = () => {
 
@@ -52,6 +53,7 @@ const Accueil = () => {
           <img src={image2} alt="Background" className="w-full h-full object-cover" />
         </div>
       </section>
+      <ScrollToTopButton />
     </>
   )
 }
