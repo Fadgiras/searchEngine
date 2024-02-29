@@ -17,7 +17,6 @@ import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.analysis.en.PorterStemFilter;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
-import org.apache.lucene.search.similarities.ClassicSimilarity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,7 +31,9 @@ import java.net.URLDecoder;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.function.Function;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.slf4j.Logger;
@@ -238,74 +239,31 @@ public class MainController {
 
     @RequestMapping(value = "/indexer", produces = "application/json")
     public String indexer() {
+        bookRepository.findAll()
+                .parallelStream()
+                .forEach(book -> {
+                    logger.trace("processing book: {}", book.getTitle());
+                    try {
+                        logger.trace("stemming book: {}", book.getTitle());
+                        List<String> tokens = stem(book.getContent());
+                        logger.trace("tokens: {}", tokens.size());
+                        logger.trace("processing words");
 
-        //get books from database
-        List<Book> books = bookRepository.findAll();
+                        Map<String, Long> occurrenceByToken = tokens.parallelStream()
+                                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
-        for (Book book : books) {
-            //get index from database
-            List<Index> allIndexes = indexRepository.getIndexByBook(book);
-//            List<RIndex> allRIndexes = RIndexRepository.findAll();
+                        List<Index> bookIndexes = occurrenceByToken.entrySet().parallelStream().map(tokenOccurrence ->
+                                new Index(book, tokenOccurrence.getKey(), (int)(long)tokenOccurrence.getValue())
+                        ).toList();
 
-
-            List<Index> currentIndexes = new ArrayList<>();
-            List<RIndex> currentRIndexes = new ArrayList<>();
-
-
-            logger.info("processing book: " + book.getTitle());
-            List<String> tokens = new ArrayList<>();
-            try {
-                logger.info("stemming book: " + book.getTitle());
-                tokens = stem(book.getContent());
-                logger.info("stemmed book: " + book.getTitle());
-                logger.info("tokens: " + tokens.size());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            logger.info("processing words");
-            for (String s : tokens) {
-//                logger.info("processing word: " + s);
-                Index index = new Index(book, s, 1);
-//                RIndex rIndex = new RIndex(s, new ArrayList<>(Set.of(book)));
-
-
-//                logger.info("Pre exists");
-                Boolean exists = allIndexes.contains(index);
-//                Boolean exists = indexRepository.existsByWordAndBook(book, s)!=null ? indexRepository.existsByWordAndBook(book, s) : false;
-//                Boolean rexists = RIndexRepository.existsByWord(s)!=null ? RIndexRepository.existsByWord(s) : false;
-//                logger.info("Post exists");
-
-//                logger.info(exists.toString());
-//                logger.info(rexists.toString());
-
-                if (exists) {
-//                    logger.info("Exist");
-//                    System.err.println(currentIndexes);
-                    Index i = allIndexes.get(allIndexes.indexOf(index));
-                    i.setFrequency(i.getFrequency() + 1);
-//                    logger.info(Integer.valueOf(i.getFrequency()).toString());
-//                    logger.info(Integer.valueOf(allIndexes.get(allIndexes.indexOf(i)).getFrequency()).toString());
-                } else {
-                    allIndexes.add(index);
-                }
-//                if(rexists) {
-//                    logger.info("RExist");
-//                    RIndex r = allRIndexes.get(allRIndexes.indexOf(rIndex));
-//                    if (!r.getBooks().contains(book)) {
-//                        r.addBook(book);
-//                    }
-//                } else {
-//                    allRIndexes.add(rIndex);
-//                }
-            }
-            logger.info("processed words");
-            logger.info("saving indexes");
-//            RIndexRepository.saveAll(allRIndexes.stream().toList());
-            indexRepository.saveAll(allIndexes.stream().toList());
-            logger.info("saved indexes");
-        }
-
-
+                        logger.trace("processed words");
+                        logger.trace("saving indexes");
+                        indexRepository.saveAll(bookIndexes);
+                        logger.trace("saved indexes");
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                });
         return "ok";
     }
 
