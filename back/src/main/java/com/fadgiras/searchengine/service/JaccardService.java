@@ -36,7 +36,6 @@ public class JaccardService {
 
         // Calcul de la distance de Jaccard entre chaque paire de livres
         for (int i = 0; i < books.size(); i++) {
-            System.err.println(i + " / " + books.size());
             for (int j = i+1; j < books.size(); j++) {
                 System.err.println(j + " / " + books.size());
                 Book book1 = books.get(i);
@@ -68,28 +67,30 @@ public class JaccardService {
         return intersection.size() / (double) union.size();
     }
 
-    public List<BookCardDTO> getSuggestedBooks(int bookId, List<BookCardDTO> foundBooks) {
-        Book book = bookRepository.findById(bookId).orElse(null);
-        if (book == null) {
-            return Collections.emptyList();
-        }
-
-        List<Object[]> suggestedBookIdsAndDistances = jaccardBookRepository.getSuggestedBookIdsAndDistances(book.getId());
+    public List<BookCardDTO> getSuggestedBooks(List<BookCardDTO> Books, List<BookCardDTO> foundBooks) {
+        List<Integer> bookIds = Books.stream().map(BookCardDTO::getId).mapToInt(Long::intValue).boxed().collect(Collectors.toList());
         List<BookCardDTO> suggestedBooks = new ArrayList<>();
 
-        int limit = 3;
-        for (Object[] suggestedBookIdAndDistance : suggestedBookIdsAndDistances) {
-            Long suggestedBookId = (Long) suggestedBookIdAndDistance[0];
-            Book suggestedBook = bookRepository.findById(Math.toIntExact(suggestedBookId)).orElse(null);
+        bookIds.stream().forEach(bookId -> {
+            Book book = bookRepository.findById(bookId).orElse(null);
+            if (book != null) {
+                List<Object[]> suggestedBookIdsAndDistances = jaccardBookRepository.getSuggestedBookIdsAndDistances(book.getId());
+                int limit = 3 * Books.size();
+                for (Object[] suggestedBookIdAndDistance : suggestedBookIdsAndDistances) {
+                    Long suggestedBookId = (Long) suggestedBookIdAndDistance[0];
+                    Book suggestedBook = bookRepository.findById(Math.toIntExact(suggestedBookId)).orElse(null);
 
-            if (foundBooks.stream().anyMatch(b -> b.getId().equals(suggestedBookId))) continue;
+                    if (foundBooks.stream().anyMatch(b -> b.getId().equals(suggestedBookId))) continue;
+                    if (suggestedBooks.stream().anyMatch(b -> b.getId().equals(suggestedBookId))) continue;
 
-            if (suggestedBook != null && suggestedBooks.size() < limit) {
-                suggestedBooks.add(new BookCardDTO(suggestedBook));
-            }else {
-                break;
+                    if (suggestedBook != null && suggestedBooks.size() < limit) {
+                        suggestedBooks.add(new BookCardDTO(suggestedBook));
+                    }else {
+                        break;
+                    }
+                }
             }
-        }
+        });
 
         return suggestedBooks;
     }

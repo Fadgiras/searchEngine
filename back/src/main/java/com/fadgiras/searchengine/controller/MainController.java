@@ -174,11 +174,7 @@ public class MainController {
                     .forEach(k -> foundBooks.add(k.getKey()));
 
             bookToSuggest = foundBooks.stream().limit(3).toList();
-            List<BookCardDTO> suggestedBooks = new ArrayList<>();
-            for (BookCardDTO book : bookToSuggest) {
-                List<BookCardDTO> suggested = jaccardService.getSuggestedBooks(Math.toIntExact(book.getId()), foundBooks);
-                suggestedBooks.addAll(suggested);
-            }
+            List<BookCardDTO> suggestedBooks = jaccardService.getSuggestedBooks(bookToSuggest, foundBooks);
 
             return new ResultDTO(foundBooks, suggestedBooks);
         }
