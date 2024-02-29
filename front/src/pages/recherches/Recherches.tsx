@@ -46,7 +46,7 @@ const Recherches: React.FC = () => {
     <>
 
       {/* --------------Barre de recherche---------------- */}
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center space-x-2 m-20">
         <select value={searchType} onChange={(e) => setSearchType(e.target.value as 'id' | 'author' | 'text')} className="border p-2 rounded">
           <option value="id">ID</option>
           <option value="author">Auteur</option>
